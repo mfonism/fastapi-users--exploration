@@ -1,0 +1,19 @@
+[project]
+name = "explore"
+version = "0.1.0"
+description = "A project for exploring the library `fastapi-users`"
+readme = "README.md"
+authors = [
+    { name = "Mfon Eti-mfon", email = "mfonetimfon@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi[standard]>=0.128.0",
+]
+
+[project.scripts]
+explore = "explore:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
