@@ -1,4 +1,5 @@
 import unittest
+from datetime import datetime, timezone
 
 from explore.auth.models import User
 
@@ -42,6 +43,14 @@ class TestUserStateSemantics(unittest.TestCase):
         user.is_superuser = False
         self.assertFalse(user.is_superuser)
         self.assertIsNone(user.superuser_granted_at)
+
+    def test_terms_accepted_at_is_timestamp(self) -> None:
+        user = User(email="terms@example.com", hashed_password="hash")
+        self.assertIsNone(user.terms_accepted_at)
+
+        accepted_at = datetime.now(timezone.utc)
+        user.terms_accepted_at = accepted_at
+        self.assertEqual(user.terms_accepted_at, accepted_at)
 
 
 if __name__ == "__main__":

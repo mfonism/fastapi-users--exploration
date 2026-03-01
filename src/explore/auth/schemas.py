@@ -12,6 +12,7 @@ class UserRead(schemas.CreateUpdateDictModel):
     superuser_granted_at: datetime | None = None
     deactivated_at: datetime | None = None
     verified_at: datetime | None = None
+    terms_accepted_at: datetime | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -19,6 +20,7 @@ class UserRead(schemas.CreateUpdateDictModel):
 class UserCreate(schemas.CreateUpdateDictModel):
     email: EmailStr
     password: str
+    terms_accepted_at: datetime | None = None
 
 
 class UserUpdate(schemas.CreateUpdateDictModel):
@@ -27,6 +29,7 @@ class UserUpdate(schemas.CreateUpdateDictModel):
     superuser_granted_at: datetime | None = None
     deactivated_at: datetime | None = None
     verified_at: datetime | None = None
+    terms_accepted_at: datetime | None = None
 
     def create_update_dict(self):
         # Keep regular users from mutating privileged/account-state fields.
