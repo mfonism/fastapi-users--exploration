@@ -60,6 +60,17 @@ class TestUserStateSemantics(unittest.TestCase):
         user.deleted_at = deleted_at
         self.assertEqual(user.deleted_at, deleted_at)
 
+    def test_created_and_updated_at_are_timestamps(self) -> None:
+        now = datetime.now(timezone.utc)
+        user = User(
+            email="audit@example.com",
+            hashed_password="hash",
+            created_at=now,
+            updated_at=now,
+        )
+        self.assertEqual(user.created_at, now)
+        self.assertEqual(user.updated_at, now)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -13,6 +13,10 @@ from ..db.base import Base
 from ..db.config import get_async_session
 
 
+def utcnow() -> datetime:
+    return datetime.now(timezone.utc)
+
+
 class User(Base):
     __tablename__ = "user"
 
@@ -24,6 +28,10 @@ class User(Base):
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     terms_accepted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=utcnow, onupdate=utcnow
+    )
 
     @property
     def is_active(self) -> bool:
@@ -31,7 +39,7 @@ class User(Base):
 
     @is_active.setter
     def is_active(self, value: bool) -> None:
-        self.deactivated_at = None if value else datetime.now(timezone.utc)
+        self.deactivated_at = None if value else utcnow()
 
     @property
     def is_verified(self) -> bool:
@@ -39,7 +47,7 @@ class User(Base):
 
     @is_verified.setter
     def is_verified(self, value: bool) -> None:
-        self.verified_at = datetime.now(timezone.utc) if value else None
+        self.verified_at = utcnow() if value else None
 
     @property
     def is_superuser(self) -> bool:
@@ -47,7 +55,7 @@ class User(Base):
 
     @is_superuser.setter
     def is_superuser(self, value: bool) -> None:
-        self.superuser_granted_at = datetime.now(timezone.utc) if value else None
+        self.superuser_granted_at = utcnow() if value else None
 
 
 async def get_user_db(session: AsyncSession = Depends(get_async_session)):

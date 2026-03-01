@@ -9,6 +9,8 @@ from fastapi_users import schemas
 class UserRead(schemas.CreateUpdateDictModel):
     id: uuid.UUID
     email: EmailStr
+    created_at: datetime
+    updated_at: datetime
     superuser_granted_at: datetime | None = None
     deactivated_at: datetime | None = None
     deleted_at: datetime | None = None
@@ -39,6 +41,8 @@ class UserUpdate(schemas.CreateUpdateDictModel):
             exclude_unset=True,
             exclude={
                 "id",
+                "created_at",
+                "updated_at",
                 "superuser_granted_at",
                 "deactivated_at",
                 "deleted_at",
