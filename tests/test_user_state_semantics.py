@@ -52,6 +52,14 @@ class TestUserStateSemantics(unittest.TestCase):
         user.terms_accepted_at = accepted_at
         self.assertEqual(user.terms_accepted_at, accepted_at)
 
+    def test_deleted_at_is_timestamp(self) -> None:
+        user = User(email="deleted@example.com", hashed_password="hash")
+        self.assertIsNone(user.deleted_at)
+
+        deleted_at = datetime.now(timezone.utc)
+        user.deleted_at = deleted_at
+        self.assertEqual(user.deleted_at, deleted_at)
+
 
 if __name__ == "__main__":
     unittest.main()

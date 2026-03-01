@@ -11,6 +11,7 @@ class UserRead(schemas.CreateUpdateDictModel):
     email: EmailStr
     superuser_granted_at: datetime | None = None
     deactivated_at: datetime | None = None
+    deleted_at: datetime | None = None
     verified_at: datetime | None = None
     terms_accepted_at: datetime | None = None
 
@@ -28,6 +29,7 @@ class UserUpdate(schemas.CreateUpdateDictModel):
     email: EmailStr | None = None
     superuser_granted_at: datetime | None = None
     deactivated_at: datetime | None = None
+    deleted_at: datetime | None = None
     verified_at: datetime | None = None
     terms_accepted_at: datetime | None = None
 
@@ -35,5 +37,11 @@ class UserUpdate(schemas.CreateUpdateDictModel):
         # Keep regular users from mutating privileged/account-state fields.
         return self.model_dump(
             exclude_unset=True,
-            exclude={"id", "superuser_granted_at", "deactivated_at", "verified_at"},
+            exclude={
+                "id",
+                "superuser_granted_at",
+                "deactivated_at",
+                "deleted_at",
+                "verified_at",
+            },
         )
