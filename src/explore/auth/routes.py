@@ -14,7 +14,7 @@ router = APIRouter()
 
 router.include_router(
     fastapi_users.get_auth_router(redis_backend),
-    prefix="/auth/redis",
+    prefix="/auth",
     tags=["auth"],
 )
 router.include_router(
