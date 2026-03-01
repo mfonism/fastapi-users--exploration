@@ -74,7 +74,7 @@ curl http://127.0.0.1:8000/users/me \
   -H "Authorization: Bearer $TOKEN"
 ```
 
-Expected: `200 OK` with user data (`is_verified` is typically `false` initially).
+Expected: `200 OK` with user data (`verified_at` is typically `null` initially).
 
 ### 5. Logout
 
