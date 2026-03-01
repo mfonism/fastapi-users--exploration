@@ -11,6 +11,7 @@ class UserRead(schemas.CreateUpdateDictModel):
     email: EmailStr
     created_at: datetime
     updated_at: datetime
+    last_login_at: datetime | None = None
     superuser_granted_at: datetime | None = None
     deactivated_at: datetime | None = None
     deleted_at: datetime | None = None
@@ -43,6 +44,7 @@ class UserUpdate(schemas.CreateUpdateDictModel):
                 "id",
                 "created_at",
                 "updated_at",
+                "last_login_at",
                 "superuser_granted_at",
                 "deactivated_at",
                 "deleted_at",

@@ -71,6 +71,14 @@ class TestUserStateSemantics(unittest.TestCase):
         self.assertEqual(user.created_at, now)
         self.assertEqual(user.updated_at, now)
 
+    def test_last_login_at_is_timestamp(self) -> None:
+        user = User(email="login@example.com", hashed_password="hash")
+        self.assertIsNone(user.last_login_at)
+
+        logged_in_at = datetime.now(timezone.utc)
+        user.last_login_at = logged_in_at
+        self.assertEqual(user.last_login_at, logged_in_at)
+
 
 if __name__ == "__main__":
     unittest.main()
