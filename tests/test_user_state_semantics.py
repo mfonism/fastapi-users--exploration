@@ -30,6 +30,19 @@ class TestUserStateSemantics(unittest.TestCase):
         self.assertFalse(user.is_verified)
         self.assertIsNone(user.verified_at)
 
+    def test_superuser_granted_at_drives_is_superuser(self) -> None:
+        user = User(email="super@example.com", hashed_password="hash")
+        self.assertFalse(user.is_superuser)
+        self.assertIsNone(user.superuser_granted_at)
+
+        user.is_superuser = True
+        self.assertTrue(user.is_superuser)
+        self.assertIsNotNone(user.superuser_granted_at)
+
+        user.is_superuser = False
+        self.assertFalse(user.is_superuser)
+        self.assertIsNone(user.superuser_granted_at)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -9,7 +9,7 @@ from fastapi_users import schemas
 class UserRead(schemas.CreateUpdateDictModel):
     id: uuid.UUID
     email: EmailStr
-    is_superuser: bool = False
+    superuser_granted_at: datetime | None = None
     deactivated_at: datetime | None = None
     verified_at: datetime | None = None
 
@@ -24,13 +24,13 @@ class UserCreate(schemas.CreateUpdateDictModel):
 class UserUpdate(schemas.CreateUpdateDictModel):
     password: str | None = None
     email: EmailStr | None = None
+    superuser_granted_at: datetime | None = None
     deactivated_at: datetime | None = None
     verified_at: datetime | None = None
-    is_superuser: bool | None = None
 
     def create_update_dict(self):
         # Keep regular users from mutating privileged/account-state fields.
         return self.model_dump(
             exclude_unset=True,
-            exclude={"id", "is_superuser", "deactivated_at", "verified_at"},
+            exclude={"id", "superuser_granted_at", "deactivated_at", "verified_at"},
         )

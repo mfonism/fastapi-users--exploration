@@ -19,7 +19,7 @@ class User(Base):
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     email: Mapped[str] = mapped_column(String(length=320), unique=True, index=True, nullable=False)
     hashed_password: Mapped[str] = mapped_column(String(length=1024), nullable=False)
-    is_superuser: Mapped[bool] = mapped_column(default=False, nullable=False)
+    superuser_granted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     deactivated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
@@ -38,6 +38,14 @@ class User(Base):
     @is_verified.setter
     def is_verified(self, value: bool) -> None:
         self.verified_at = datetime.now(timezone.utc) if value else None
+
+    @property
+    def is_superuser(self) -> bool:
+        return self.superuser_granted_at is not None
+
+    @is_superuser.setter
+    def is_superuser(self, value: bool) -> None:
+        self.superuser_granted_at = datetime.now(timezone.utc) if value else None
 
 
 async def get_user_db(session: AsyncSession = Depends(get_async_session)):
