@@ -6,11 +6,12 @@ readme = "README.md"
 authors = [
     { name = "Mfon Eti-mfon", email = "mfonetimfon@gmail.com" }
 ]
-requires-python = ">=3.13"
+requires-python = ">=3.14"
 dependencies = [
     "asyncpg>=0.30.0",
     "fastapi-users[redis,sqlalchemy]>=15.0.3",
     "fastapi[standard]>=0.128.0",
+    "packaging>=25.0",
     "pydantic-settings>=2.11.0",
     "psycopg[binary]>=3.2.10",
     "python-dotenv>=1.1.1",

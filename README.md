@@ -6,6 +6,8 @@ In which I explore `fastapi-users`
 
 `uv run fastapi dev src/explore/app.py`
 
+Requires Python `3.14+`.
+
 ## Testing
 
 Run all tests:
@@ -75,6 +77,7 @@ The SQLAlchemy URL is built from:
 - `DB_NAME`
 
 Defaults are `postgres/postgres/explore` on `localhost:5432`.
+Required PostgreSQL version is hardcoded in [`src/explore/db/config.py`](src/explore/db/config.py) as `REQUIRED_POSTGRES_VERSION`.
 
 ## Auth flow
 
@@ -84,7 +87,7 @@ This app uses bearer auth with Redis-backed tokens.
 
 Start PostgreSQL locally:
 
-`docker run --rm --name explore-postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=explore -p 5432:5432 postgres:17`
+`docker run --rm --name explore-postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=explore -p 5432:5432 postgres:18.3`
 
 Start Redis locally:
 
