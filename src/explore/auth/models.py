@@ -23,7 +23,7 @@ class User(Base):
     __tablename__ = "user"
 
     # Identity
-    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid7)
     email: Mapped[str] = mapped_column(
         String(length=320), unique=True, index=True, nullable=False
     )

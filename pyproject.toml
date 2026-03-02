@@ -6,7 +6,7 @@ readme = "README.md"
 authors = [
     { name = "Mfon Eti-mfon", email = "mfonetimfon@gmail.com" }
 ]
-requires-python = ">=3.14"
+requires-python = ">=3.14.3"
 dependencies = [
     "asyncpg>=0.30.0",
     "fastapi-users[redis,sqlalchemy]>=15.0.3",
