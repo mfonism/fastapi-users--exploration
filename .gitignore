@@ -1,12 +1,47 @@
-# Python-generated files
+# Python bytecode and caches
 __pycache__/
-*.py[oc]
-build/
-dist/
-wheels/
-*.egg-info
+*.py[cod]
+*.pyo
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+.hypothesis/
+.pyre/
+.tox/
+.nox/
 
 # Virtual environments
-.venv
+.venv/
+venv/
+env/
+ENV/
 
-.data
+# Environment and local secrets
+.env
+.env.*
+.envrc
+
+# Coverage and test artifacts
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# IDE/editor
+.vscode/
+.idea/
+
+# Local runtime data (project-specific)
+src/.data/
+*.sqlite3
+*.sqlite
+
+# Local Redis artifacts
+*.rdb
+*.aof
+*.pid
