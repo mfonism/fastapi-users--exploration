@@ -6,6 +6,16 @@ In which I explore `fastapi-users`
 
 `uv run fastapi dev src/explore/app.py`
 
+## Testing
+
+Run all tests:
+
+`python -m unittest discover -s tests -p 'test_*.py' -q`
+
+Run one test file:
+
+`python -m unittest -q tests/test_settings.py`
+
 ## Configuration
 
 Settings are loaded with `pydantic-settings` via `get_settings()` in [`src/explore/settings.py`](src/explore/settings.py).
