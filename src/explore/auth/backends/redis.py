@@ -5,14 +5,16 @@ from fastapi_users.authentication import (
     RedisStrategy,
 )
 
-from ... import settings
+from ...settings import get_settings
+
+settings = get_settings()
 
 transport = BearerTransport(tokenUrl="auth/login")
 
 
 def get_strategy() -> RedisStrategy:
     return RedisStrategy(
-        redis=redis.asyncio.from_url(settings.AUTH_REDIS_URL, decode_responses=True),
+        redis=redis.asyncio.from_url(settings.auth_redis_url, decode_responses=True),
         lifetime_seconds=3600,
     )
 

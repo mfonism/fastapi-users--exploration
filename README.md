@@ -6,6 +6,52 @@ In which I explore `fastapi-users`
 
 `uv run fastapi dev src/explore/app.py`
 
+## Configuration
+
+Settings are loaded with `pydantic-settings` via `get_settings()` in [`src/explore/settings.py`](src/explore/settings.py).
+
+### Environment selection
+
+Use `APP_ENV` to choose the active environment:
+
+- `local`
+- `test`
+- `staging`
+- `production`
+
+Supported aliases include `dev`, `testing`, `stage`, and `prod`.
+
+### Env file loading
+
+The app loads, in order:
+
+1. `.env` (shared defaults)
+2. `.env.<env>` (environment-specific override)
+
+Examples:
+
+- `.env.local`
+- `.env.test`
+- `.env.staging`
+- `.env.production`
+
+Environment variables always override values from env files.
+
+### Debug mode
+
+`DEBUG` controls FastAPI debug mode.
+
+If `DEBUG` is not set:
+
+- `local` and `test` default to `true`
+- `staging` and `production` default to `false`
+
+Debug mode is mainly for development (detailed exception pages and development diagnostics). It should stay off in staging/production.
+
+### Example env file
+
+See `.env.example` for all supported variables and placeholders.
+
 ## Auth flow
 
 This app uses bearer auth with Redis-backed tokens.

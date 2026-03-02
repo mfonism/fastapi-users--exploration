@@ -11,6 +11,8 @@ dependencies = [
     "aiosqlite>=0.22.1",
     "fastapi-users[redis,sqlalchemy]>=15.0.3",
     "fastapi[standard]>=0.128.0",
+    "pydantic-settings>=2.11.0",
+    "python-dotenv>=1.1.1",
 ]
 
 [project.scripts]

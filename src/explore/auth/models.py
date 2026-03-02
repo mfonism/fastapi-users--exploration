@@ -8,9 +8,11 @@ from sqlalchemy import DateTime, String
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .. import settings
 from ..db.base import Base
 from ..db.config import get_async_session
+from ..settings import get_settings
+
+settings = get_settings()
 
 
 def utcnow() -> datetime:
@@ -91,8 +93,8 @@ async def get_user_db(session: AsyncSession = Depends(get_async_session)):
 
 
 class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
-    reset_password_token_secret = settings.RESET_PASSWORD_TOKEN_SECRET
-    verification_token_secret = settings.VERIFICATION_TOKEN_SECRET
+    reset_password_token_secret = settings.reset_password_token_secret
+    verification_token_secret = settings.verification_token_secret
 
     async def on_after_login(
         self,

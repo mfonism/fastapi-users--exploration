@@ -20,6 +20,7 @@ ENV/
 .env
 .env.*
 .envrc
+!.env.example
 
 # Coverage and test artifacts
 .coverage
