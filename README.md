@@ -52,11 +52,29 @@ Debug mode is mainly for development (detailed exception pages and development d
 
 See `.env.example` for all supported variables and placeholders.
 
+### Database backend
+
+The app is configured for PostgreSQL with async SQLAlchemy (`asyncpg` driver).
+The SQLAlchemy URL is built from:
+
+- `DB_DRIVER`
+- `DB_HOST`
+- `DB_PORT`
+- `DB_USER`
+- `DB_PASSWORD`
+- `DB_NAME`
+
+Defaults are `postgres/postgres/explore` on `localhost:5432`.
+
 ## Auth flow
 
 This app uses bearer auth with Redis-backed tokens.
 
 ### 0. Prerequisites
+
+Start PostgreSQL locally:
+
+`docker run --rm --name explore-postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=explore -p 5432:5432 postgres:17`
 
 Start Redis locally:
 

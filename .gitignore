@@ -37,11 +37,6 @@ dist/
 .vscode/
 .idea/
 
-# Local runtime data (project-specific)
-src/.data/
-*.sqlite3
-*.sqlite
-
 # Local Redis artifacts
 *.rdb
 *.aof

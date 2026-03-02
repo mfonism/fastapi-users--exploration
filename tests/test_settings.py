@@ -4,6 +4,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+from pydantic import SecretStr
+
 from explore.config import AppEnv, normalize_app_env, resolve_env_files
 from explore.settings import Settings
 
@@ -28,13 +30,12 @@ class TestSettings(unittest.TestCase):
             )
 
     def test_debug_default_depends_on_environment(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            with patch.dict(os.environ, {}, clear=True):
-                local_settings = Settings(app_env=AppEnv.LOCAL, data_dir=temp_dir)
-                staging_settings = Settings(app_env=AppEnv.STAGING, data_dir=temp_dir)
+        with patch.dict(os.environ, {}, clear=True):
+            local_settings = Settings(app_env=AppEnv.LOCAL)
+            staging_settings = Settings(app_env=AppEnv.STAGING)
 
-                self.assertTrue(local_settings.debug)
-                self.assertFalse(staging_settings.debug)
+            self.assertTrue(local_settings.debug)
+            self.assertFalse(staging_settings.debug)
 
     def test_environment_variables_override_env_files(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -55,10 +56,23 @@ class TestSettings(unittest.TestCase):
                 settings = Settings(
                     _env_file=str(env_file),
                     app_env=AppEnv.LOCAL,
-                    data_dir=temp_dir,
                 )
 
             self.assertEqual(settings.auth_redis_url, "redis://localhost:6379/7")
+
+    def test_database_url_is_built_from_parts(self) -> None:
+        settings = Settings(
+            db_driver="postgresql+asyncpg",
+            db_host="db.internal",
+            db_port=5433,
+            db_user="app_user",
+            db_password=SecretStr("s3cret"),
+            db_name="explore_app",
+        )
+        self.assertEqual(
+            settings.core_db_url,
+            "postgresql+asyncpg://app_user:s3cret@db.internal:5433/explore_app",
+        )
 
 
 if __name__ == "__main__":

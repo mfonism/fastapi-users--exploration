@@ -1,6 +1,7 @@
 import os
 from functools import lru_cache
 from pathlib import Path
+from urllib.parse import quote_plus
 
 from pydantic import SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -14,14 +15,21 @@ class Settings(BaseSettings):
     app_env: AppEnv = AppEnv.LOCAL
     debug: bool | None = None
 
-    data_dir: Path | None = None
-    core_db_url: str | None = None
+    db_driver: str = "postgresql+asyncpg"
+    db_host: str = "localhost"
+    db_port: int = 5432
+    db_user: str = "postgres"
+    db_password: SecretStr = SecretStr("postgres")
+    db_name: str = "explore"
+
     auth_redis_url: str = "redis://localhost:6379/0"
 
     reset_password_token_secret: SecretStr = SecretStr(
         "EXPLORE: RESET PASSWORD TOKEN SECRET"
     )
-    verification_token_secret: SecretStr = SecretStr("EXPLORE: VERIFICATION TOKEN SECRET")
+    verification_token_secret: SecretStr = SecretStr(
+        "EXPLORE: VERIFICATION TOKEN SECRET"
+    )
 
     model_config = SettingsConfigDict(
         env_file=None,
@@ -55,14 +63,16 @@ class Settings(BaseSettings):
         if self.debug is None:
             self.debug = self.app_env in {AppEnv.LOCAL, AppEnv.TEST}
 
-        if self.data_dir is None:
-            self.data_dir = BASE_DIR / ".data"
-        self.data_dir.mkdir(exist_ok=True)
-
-        if self.core_db_url is None:
-            self.core_db_url = f"sqlite+aiosqlite:///{self.data_dir / 'db.sqlite'}"
-
         return self
+
+    @property
+    def core_db_url(self) -> str:
+        user = quote_plus(self.db_user)
+        password = quote_plus(self.db_password.get_secret_value())
+        return (
+            f"{self.db_driver}://{user}:{password}@"
+            f"{self.db_host}:{self.db_port}/{self.db_name}"
+        )
 
 
 @lru_cache
