@@ -1,10 +1,10 @@
 import os
 from functools import lru_cache
 from pathlib import Path
-from urllib.parse import quote_plus
 
 from pydantic import SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from sqlalchemy.engine import URL
 
 from .config import AppEnv, normalize_app_env, resolve_env_files
 
@@ -79,12 +79,14 @@ class Settings(BaseSettings):
         return f"{self.redis_key_prefix_base}:"
 
     @property
-    def core_db_url(self) -> str:
-        user = quote_plus(self.db_user)
-        password = quote_plus(self.db_password.get_secret_value())
-        return (
-            f"{self.db_driver}://{user}:{password}@"
-            f"{self.db_host}:{self.db_port}/{self.database_name}"
+    def core_db_url(self) -> URL:
+        return URL.create(
+            drivername=self.db_driver,
+            username=self.db_user,
+            password=self.db_password.get_secret_value(),
+            host=self.db_host,
+            port=self.db_port,
+            database=self.database_name,
         )
 
 

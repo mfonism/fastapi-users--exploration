@@ -5,6 +5,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from pydantic import SecretStr
+from sqlalchemy.engine import URL
 
 from explore.config import AppEnv, normalize_app_env, resolve_env_files
 from explore.settings import Settings
@@ -70,8 +71,9 @@ class TestSettings(unittest.TestCase):
             db_password=SecretStr("s3cret"),
             db_base_name="explore_app",
         )
+        self.assertIsInstance(settings.core_db_url, URL)
         self.assertEqual(
-            settings.core_db_url,
+            settings.core_db_url.render_as_string(hide_password=False),
             "postgresql+asyncpg://app_user:s3cret@db.internal:5433/explore_app",
         )
 
@@ -87,7 +89,7 @@ class TestSettings(unittest.TestCase):
         )
         self.assertEqual(settings.database_name, "explore_test")
         self.assertEqual(
-            settings.core_db_url,
+            settings.core_db_url.render_as_string(hide_password=False),
             "postgresql+asyncpg://postgres:postgres@localhost:5432/explore_test",
         )
 

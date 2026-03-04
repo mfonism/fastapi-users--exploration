@@ -1,5 +1,7 @@
 import unittest
 
+from sqlalchemy.engine import URL
+
 from explore.config import AppEnv
 from explore.db.config import (
     is_local_or_test_env,
@@ -33,7 +35,7 @@ class TestDbConfig(unittest.TestCase):
         self.assertFalse(is_local_or_test_env(AppEnv.STAGING))
         self.assertFalse(is_local_or_test_env(AppEnv.PRODUCTION))
 
-    def test_admin_db_url_replaces_async_driver_and_quotes(self) -> None:
+    def test_admin_db_url_uses_plain_postgresql_driver_for_psycopg(self) -> None:
         # override settings object in module to control values
         from types import SimpleNamespace
 
@@ -49,11 +51,13 @@ class TestDbConfig(unittest.TestCase):
 
         cfg.settings = fake
         url = cfg.get_admin_db_url()
-        # driver should have swapped +asyncpg to +psycopg and credentials quoted
-        self.assertTrue(url.startswith("postgresql+psycopg://"))
-        self.assertIn("user%2Bname", url)
-        self.assertIn("p%40ss+word", url)
-        self.assertIn("/postgres", url)
+        self.assertIsInstance(url, URL)
+        self.assertEqual(url.drivername, "postgresql")
+        self.assertEqual(url.username, "user+name")
+        self.assertEqual(url.password, "p@ss word")
+        self.assertEqual(url.host, "host")
+        self.assertEqual(url.port, 5432)
+        self.assertEqual(url.database, "postgres")
 
     def test_engine_and_session_maker_are_cached(self) -> None:
         import explore.db.config as cfg

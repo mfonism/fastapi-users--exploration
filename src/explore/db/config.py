@@ -1,12 +1,12 @@
 from collections.abc import AsyncGenerator
 from functools import lru_cache
 import re
-from urllib.parse import quote_plus
 
 from packaging.version import InvalidVersion, Version
 import psycopg
 from psycopg import sql
 from sqlalchemy import text
+from sqlalchemy.engine import URL
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from ..config import AppEnv
@@ -55,21 +55,27 @@ def is_local_or_test_env(app_env: AppEnv) -> bool:
     return app_env in {AppEnv.LOCAL, AppEnv.TEST}
 
 
-def get_admin_db_url() -> str:
-    user = quote_plus(settings.db_user)
-    password = quote_plus(settings.db_password.get_secret_value())
-    driver = settings.db_driver.replace("+asyncpg", "+psycopg")
-    return (
-        f"{driver}://{user}:{password}@"
-        f"{settings.db_host}:{settings.db_port}/{ADMIN_DATABASE_NAME}"
+def get_admin_db_url() -> URL:
+    # This URL is passed to psycopg.AsyncConnection.connect(), not SQLAlchemy.
+    # psycopg expects a plain PostgreSQL DSN ("postgresql://..."), while
+    # SQLAlchemy-only driver suffixes (like "+asyncpg" / "+psycopg") are for
+    # create_engine/create_async_engine URLs.
+    return URL.create(
+        drivername="postgresql",
+        username=settings.db_user,
+        password=settings.db_password.get_secret_value(),
+        host=settings.db_host,
+        port=settings.db_port,
+        database=ADMIN_DATABASE_NAME,
     )
 
 
 async def ensure_database() -> None:
     can_manage_roles_and_ownership = is_local_or_test_env(settings.app_env)
+    admin_db_url = get_admin_db_url().render_as_string(hide_password=False)
 
     async with await psycopg.AsyncConnection.connect(
-        get_admin_db_url(), autocommit=True
+        admin_db_url, autocommit=True
     ) as conn:
         async with conn.cursor() as cursor:
             await cursor.execute(
