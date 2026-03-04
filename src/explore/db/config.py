@@ -71,20 +71,20 @@ def get_admin_db_url() -> URL:
 
 
 async def ensure_database() -> None:
-    # Only local/test may auto-create/fix DB role ownership.
+    # Only local/test may auto-create/fix DB role ownership
     can_manage_roles_and_ownership = is_local_or_test_env(settings.app_env)
 
     admin_db_url = get_admin_db_url().render_as_string(hide_password=False)
 
-    # Connect asynchronously to the admin database
-    # using autocommit=True so that CREATE DATABASE and other DDL can run outside a transaction
+    # Bootstrap db: async, to avoid blocking the event loop
+    # (autocommit is required because CREATE DATABASE cannot run in a transaction)
     async with await psycopg.AsyncConnection.connect(
         admin_db_url, autocommit=True
     ) as conn:
         async with conn.cursor() as cursor:
             if can_manage_roles_and_ownership:
                 # Create-first pattern is race-safe: duplicates mean another
-                # process already created the same object.
+                # process already created the same object
                 try:
                     await cursor.execute(
                         sql.SQL("CREATE ROLE {} WITH LOGIN PASSWORD {}").format(
@@ -102,13 +102,17 @@ async def ensure_database() -> None:
                             sql.Identifier(settings.db_user),
                         )
                     )
-                    # Newly created DB already has the expected owner.
-                    return
+                    # Newly created DB already has the expected owner
+
                 except errors.DuplicateDatabase:
-                    # Existing DB: continue to ownership verification.
-                    pass
+                    # Existing DB: continue to ownership verification
+                    await _verify_and_fix_database_owner(
+                        cursor, can_manage_roles_and_ownership
+                    )
+
+                return
             else:
-                # In staging/production, validate only; do not mutate infra.
+                # In staging/production, validate only; do not mutate infra
                 await cursor.execute(
                     "SELECT 1 FROM pg_roles WHERE rolname = %s",
                     (settings.db_user,),
@@ -127,38 +131,45 @@ async def ensure_database() -> None:
                         f"Database '{settings.database_name}' does not exist in {settings.app_env}."
                     )
 
-            # Verify (and if allowed, fix) owner drift.
-            await cursor.execute(
-                """
-                SELECT pg_catalog.pg_get_userbyid(d.datdba)
-                FROM pg_database d
-                WHERE d.datname = %s
-                """,
-                (settings.database_name,),
-            )
-            owner_row = await cursor.fetchone()
+            # Verify (and if allowed, fix) owner drift
+            await _verify_and_fix_database_owner(cursor, can_manage_roles_and_ownership)
 
-            # Defensive check: owner should always be resolvable for an existing DB.
-            if owner_row is None:
-                raise RuntimeError("Database owner should never be none!")
 
-            owner = owner_row[0]
+async def _verify_and_fix_database_owner(
+    cursor,
+    can_manage_roles_and_ownership: bool,
+) -> None:
+    await cursor.execute(
+        """
+        SELECT pg_catalog.pg_get_userbyid(d.datdba)
+        FROM pg_database d
+        WHERE d.datname = %s
+        """,
+        (settings.database_name,),
+    )
+    owner_row = await cursor.fetchone()
 
-            if owner == settings.db_user:
-                return
+    # Defensive check: owner should always be resolvable for an existing DB
+    if owner_row is None:
+        raise RuntimeError("Database owner should never be None!")
 
-            if not can_manage_roles_and_ownership:
-                raise RuntimeError(
-                    f"Database '{settings.database_name}' is owned by '{owner}', "
-                    f"expected it to be owned by '{settings.db_user}' in {settings.app_env}."
-                )
+    owner = owner_row[0]
 
-            await cursor.execute(
-                sql.SQL("ALTER DATABASE {} OWNER TO {}").format(
-                    sql.Identifier(settings.database_name),
-                    sql.Identifier(settings.db_user),
-                )
-            )
+    if owner == settings.db_user:
+        return
+
+    if not can_manage_roles_and_ownership:
+        raise RuntimeError(
+            f"Database '{settings.database_name}' is owned by '{owner}'. "
+            f"Expected it to be owned by '{settings.db_user}' in {settings.app_env}."
+        )
+
+    await cursor.execute(
+        sql.SQL("ALTER DATABASE {} OWNER TO {}").format(
+            sql.Identifier(settings.database_name),
+            sql.Identifier(settings.db_user),
+        )
+    )
 
 
 async def init_db():
