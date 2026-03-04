@@ -71,17 +71,20 @@ def get_admin_db_url() -> URL:
 
 
 async def ensure_database() -> None:
+    # Only local/test may auto-create/fix DB role ownership.
     can_manage_roles_and_ownership = is_local_or_test_env(settings.app_env)
+
     admin_db_url = get_admin_db_url().render_as_string(hide_password=False)
 
-    # Keep this async in FastAPI startup so database bootstrapping I/O does not
-    # block the event loop. Use a sync connection only if bootstrapping moves to
-    # a separate pre-start script/CLI that runs outside the app process.
+    # Connect asynchronously to the admin database
+    # using autocommit=True so that CREATE DATABASE and other DDL can run outside a transaction
     async with await psycopg.AsyncConnection.connect(
         admin_db_url, autocommit=True
     ) as conn:
         async with conn.cursor() as cursor:
             if can_manage_roles_and_ownership:
+                # Create-first pattern is race-safe: duplicates mean another
+                # process already created the same object.
                 try:
                     await cursor.execute(
                         sql.SQL("CREATE ROLE {} WITH LOGIN PASSWORD {}").format(
@@ -99,10 +102,13 @@ async def ensure_database() -> None:
                             sql.Identifier(settings.db_user),
                         )
                     )
+                    # Newly created DB already has the expected owner.
                     return
                 except errors.DuplicateDatabase:
+                    # Existing DB: continue to ownership verification.
                     pass
             else:
+                # In staging/production, validate only; do not mutate infra.
                 await cursor.execute(
                     "SELECT 1 FROM pg_roles WHERE rolname = %s",
                     (settings.db_user,),
@@ -121,6 +127,7 @@ async def ensure_database() -> None:
                         f"Database '{settings.database_name}' does not exist in {settings.app_env}."
                     )
 
+            # Verify (and if allowed, fix) owner drift.
             await cursor.execute(
                 """
                 SELECT pg_catalog.pg_get_userbyid(d.datdba)
@@ -131,10 +138,12 @@ async def ensure_database() -> None:
             )
             owner_row = await cursor.fetchone()
 
+            # Defensive check: owner should always be resolvable for an existing DB.
             if owner_row is None:
                 raise RuntimeError("Database owner should never be none!")
 
             owner = owner_row[0]
+
             if owner == settings.db_user:
                 return
 
