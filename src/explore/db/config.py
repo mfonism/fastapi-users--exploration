@@ -74,6 +74,9 @@ async def ensure_database() -> None:
     can_manage_roles_and_ownership = is_local_or_test_env(settings.app_env)
     admin_db_url = get_admin_db_url().render_as_string(hide_password=False)
 
+    # Keep this async in FastAPI startup so database bootstrapping I/O does not
+    # block the event loop. Use a sync connection only if bootstrapping moves to
+    # a separate pre-start script/CLI that runs outside the app process.
     async with await psycopg.AsyncConnection.connect(
         admin_db_url, autocommit=True
     ) as conn:
