@@ -51,7 +51,7 @@ def is_postgres_server_version_compatible(
     return actual.release[:2] == required.release[:2]
 
 
-def should_manage_db_roles_and_ownership(app_env: AppEnv) -> bool:
+def is_local_or_test_env(app_env: AppEnv) -> bool:
     return app_env in {AppEnv.LOCAL, AppEnv.TEST}
 
 
@@ -66,7 +66,7 @@ def get_admin_db_url() -> str:
 
 
 async def ensure_database() -> None:
-    is_local_or_test = should_manage_db_roles_and_ownership(settings.app_env)
+    can_manage_roles_and_ownership = is_local_or_test_env(settings.app_env)
 
     async with await psycopg.AsyncConnection.connect(
         get_admin_db_url(), autocommit=True
@@ -79,7 +79,7 @@ async def ensure_database() -> None:
             role_existence = await cursor.fetchone()
 
             if role_existence is None:
-                if not is_local_or_test:
+                if not can_manage_roles_and_ownership:
                     raise RuntimeError(
                         f"Role '{settings.db_user}' does not exist in {settings.app_env}."
                     )
@@ -98,7 +98,7 @@ async def ensure_database() -> None:
             database_existence = await cursor.fetchone()
 
             if database_existence is None:
-                if not is_local_or_test:
+                if not can_manage_roles_and_ownership:
                     raise RuntimeError(
                         f"Database '{settings.database_name}' does not exist in {settings.app_env}."
                     )
@@ -123,7 +123,7 @@ async def ensure_database() -> None:
             owner = owner_existence[0] if owner_existence else None
 
             if owner != settings.db_user:
-                if not is_local_or_test:
+                if not can_manage_roles_and_ownership:
                     raise RuntimeError(
                         f"Database '{settings.database_name}' is owned by '{owner}', "
                         f"expected '{settings.db_user}' in {settings.app_env}."

@@ -2,8 +2,8 @@ import unittest
 
 from explore.config import AppEnv
 from explore.db.config import (
+    is_local_or_test_env,
     is_postgres_server_version_compatible,
-    should_manage_db_roles_and_ownership,
 )
 
 
@@ -28,10 +28,10 @@ class TestDbConfig(unittest.TestCase):
         self.assertFalse(is_postgres_server_version_compatible("18.3", "18"))
 
     def test_role_ownership_management_is_limited_to_local_and_test(self) -> None:
-        self.assertTrue(should_manage_db_roles_and_ownership(AppEnv.LOCAL))
-        self.assertTrue(should_manage_db_roles_and_ownership(AppEnv.TEST))
-        self.assertFalse(should_manage_db_roles_and_ownership(AppEnv.STAGING))
-        self.assertFalse(should_manage_db_roles_and_ownership(AppEnv.PRODUCTION))
+        self.assertTrue(is_local_or_test_env(AppEnv.LOCAL))
+        self.assertTrue(is_local_or_test_env(AppEnv.TEST))
+        self.assertFalse(is_local_or_test_env(AppEnv.STAGING))
+        self.assertFalse(is_local_or_test_env(AppEnv.PRODUCTION))
 
     def test_admin_db_url_replaces_async_driver_and_quotes(self) -> None:
         # override settings object in module to control values
