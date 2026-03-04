@@ -4,7 +4,7 @@ import re
 
 from packaging.version import InvalidVersion, Version
 import psycopg
-from psycopg import sql
+from psycopg import errors, sql
 from sqlalchemy import text
 from sqlalchemy.engine import URL
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
@@ -81,44 +81,45 @@ async def ensure_database() -> None:
         admin_db_url, autocommit=True
     ) as conn:
         async with conn.cursor() as cursor:
-            await cursor.execute(
-                "SELECT 1 FROM pg_roles WHERE rolname = %s",
-                (settings.db_user,),
-            )
-            role_existence = await cursor.fetchone()
+            if can_manage_roles_and_ownership:
+                try:
+                    await cursor.execute(
+                        sql.SQL("CREATE ROLE {} WITH LOGIN PASSWORD {}").format(
+                            sql.Identifier(settings.db_user),
+                            sql.Literal(settings.db_password.get_secret_value()),
+                        )
+                    )
+                except errors.DuplicateObject:
+                    pass
 
-            if role_existence is None:
-                if not can_manage_roles_and_ownership:
+                try:
+                    await cursor.execute(
+                        sql.SQL("CREATE DATABASE {} OWNER {}").format(
+                            sql.Identifier(settings.database_name),
+                            sql.Identifier(settings.db_user),
+                        )
+                    )
+                    return
+                except errors.DuplicateDatabase:
+                    pass
+            else:
+                await cursor.execute(
+                    "SELECT 1 FROM pg_roles WHERE rolname = %s",
+                    (settings.db_user,),
+                )
+                if await cursor.fetchone() is None:
                     raise RuntimeError(
                         f"Role '{settings.db_user}' does not exist in {settings.app_env}."
                     )
 
                 await cursor.execute(
-                    sql.SQL("CREATE ROLE {} WITH LOGIN PASSWORD {}").format(
-                        sql.Identifier(settings.db_user),
-                        sql.Literal(settings.db_password.get_secret_value()),
-                    )
+                    "SELECT 1 FROM pg_database WHERE datname = %s",
+                    (settings.database_name,),
                 )
-
-            await cursor.execute(
-                "SELECT 1 FROM pg_database WHERE datname = %s",
-                (settings.database_name,),
-            )
-            database_existence = await cursor.fetchone()
-
-            if database_existence is None:
-                if not can_manage_roles_and_ownership:
+                if await cursor.fetchone() is None:
                     raise RuntimeError(
                         f"Database '{settings.database_name}' does not exist in {settings.app_env}."
                     )
-
-                await cursor.execute(
-                    sql.SQL("CREATE DATABASE {} OWNER {}").format(
-                        sql.Identifier(settings.database_name),
-                        sql.Identifier(settings.db_user),
-                    )
-                )
-                return
 
             await cursor.execute(
                 """
@@ -128,22 +129,27 @@ async def ensure_database() -> None:
                 """,
                 (settings.database_name,),
             )
-            owner_existence = await cursor.fetchone()
-            owner = owner_existence[0] if owner_existence else None
+            owner_row = await cursor.fetchone()
 
-            if owner != settings.db_user:
-                if not can_manage_roles_and_ownership:
-                    raise RuntimeError(
-                        f"Database '{settings.database_name}' is owned by '{owner}', "
-                        f"expected '{settings.db_user}' in {settings.app_env}."
-                    )
+            if owner_row is None:
+                raise RuntimeError("Database owner should never be none!")
 
-                await cursor.execute(
-                    sql.SQL("ALTER DATABASE {} OWNER TO {}").format(
-                        sql.Identifier(settings.database_name),
-                        sql.Identifier(settings.db_user),
-                    )
+            owner = owner_row[0]
+            if owner == settings.db_user:
+                return
+
+            if not can_manage_roles_and_ownership:
+                raise RuntimeError(
+                    f"Database '{settings.database_name}' is owned by '{owner}', "
+                    f"expected it to be owned by '{settings.db_user}' in {settings.app_env}."
                 )
+
+            await cursor.execute(
+                sql.SQL("ALTER DATABASE {} OWNER TO {}").format(
+                    sql.Identifier(settings.database_name),
+                    sql.Identifier(settings.db_user),
+                )
+            )
 
 
 async def init_db():
