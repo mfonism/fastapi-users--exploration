@@ -16,6 +16,7 @@ def get_strategy() -> RedisStrategy:
     return RedisStrategy(
         redis=redis.asyncio.from_url(settings.auth_redis_url, decode_responses=True),
         lifetime_seconds=3600,
+        key_prefix=settings.redis_key_prefix,
     )
 
 

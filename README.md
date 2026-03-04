@@ -12,11 +12,11 @@ Requires Python `3.14+`.
 
 Run all tests:
 
-`python -m unittest discover -s tests -p 'test_*.py' -q`
+`APP_ENV=test python -m unittest discover -s tests -p 'test_*.py' -q`
 
 Run one test file:
 
-`python -m unittest -q tests/test_settings.py`
+`APP_ENV=test python -m unittest -q tests/test_settings.py`
 
 ## Configuration
 
@@ -74,10 +74,16 @@ The SQLAlchemy URL is built from:
 - `DB_PORT`
 - `DB_USER`
 - `DB_PASSWORD`
-- `DB_NAME`
+- `DB_BASE_NAME`
 
 Defaults are `postgres/postgres/explore` on `localhost:5432`.
+When `APP_ENV=test`, the app automatically uses `${DB_BASE_NAME}_test`.
 Required PostgreSQL version is hardcoded in [`src/explore/db/config.py`](src/explore/db/config.py) as `REQUIRED_POSTGRES_VERSION`.
+
+For Redis token storage, a key prefix is also derived from `REDIS_KEY_PREFIX_BASE`:
+
+- non-test: `${REDIS_KEY_PREFIX_BASE}:`
+- test: `${REDIS_KEY_PREFIX_BASE}_test:`
 
 ## Auth flow
 

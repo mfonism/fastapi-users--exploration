@@ -20,9 +20,10 @@ class Settings(BaseSettings):
     db_port: int = 5432
     db_user: str = "postgres"
     db_password: SecretStr = SecretStr("postgres")
-    db_name: str = "explore"
+    db_base_name: str = "explore"
 
     auth_redis_url: str = "redis://localhost:6379/0"
+    redis_key_prefix_base: str = "explore_auth_tokens"
 
     reset_password_token_secret: SecretStr = SecretStr(
         "EXPLORE: RESET PASSWORD TOKEN SECRET"
@@ -66,12 +67,24 @@ class Settings(BaseSettings):
         return self
 
     @property
+    def database_name(self) -> str:
+        if self.app_env == AppEnv.TEST:
+            return f"{self.db_base_name}_test"
+        return self.db_base_name
+
+    @property
+    def redis_key_prefix(self) -> str:
+        if self.app_env == AppEnv.TEST:
+            return f"{self.redis_key_prefix_base}_test:"
+        return f"{self.redis_key_prefix_base}:"
+
+    @property
     def core_db_url(self) -> str:
         user = quote_plus(self.db_user)
         password = quote_plus(self.db_password.get_secret_value())
         return (
             f"{self.db_driver}://{user}:{password}@"
-            f"{self.db_host}:{self.db_port}/{self.db_name}"
+            f"{self.db_host}:{self.db_port}/{self.database_name}"
         )
 
 

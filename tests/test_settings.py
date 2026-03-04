@@ -62,17 +62,41 @@ class TestSettings(unittest.TestCase):
 
     def test_database_url_is_built_from_parts(self) -> None:
         settings = Settings(
+            app_env=AppEnv.LOCAL,
             db_driver="postgresql+asyncpg",
             db_host="db.internal",
             db_port=5433,
             db_user="app_user",
             db_password=SecretStr("s3cret"),
-            db_name="explore_app",
+            db_base_name="explore_app",
         )
         self.assertEqual(
             settings.core_db_url,
             "postgresql+asyncpg://app_user:s3cret@db.internal:5433/explore_app",
         )
+
+    def test_test_environment_uses_db_name_suffix(self) -> None:
+        settings = Settings(
+            app_env=AppEnv.TEST,
+            db_driver="postgresql+asyncpg",
+            db_host="localhost",
+            db_port=5432,
+            db_user="postgres",
+            db_password=SecretStr("postgres"),
+            db_base_name="explore",
+        )
+        self.assertEqual(settings.database_name, "explore_test")
+        self.assertEqual(
+            settings.core_db_url,
+            "postgresql+asyncpg://postgres:postgres@localhost:5432/explore_test",
+        )
+
+    def test_test_environment_uses_redis_key_prefix_suffix(self) -> None:
+        settings = Settings(
+            app_env=AppEnv.TEST,
+            redis_key_prefix_base="explore_tokens",
+        )
+        self.assertEqual(settings.redis_key_prefix, "explore_tokens_test:")
 
 
 if __name__ == "__main__":
