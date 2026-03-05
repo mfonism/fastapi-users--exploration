@@ -13,13 +13,13 @@ from ..config import AppEnv
 from ..settings import get_settings
 from .base import Base
 
-settings = get_settings()
 REQUIRED_POSTGRES_VERSION = "18.3"
 ADMIN_DATABASE_NAME = "postgres"
 
 
 @lru_cache
 def get_engine():
+    settings = get_settings()
     return create_async_engine(settings.core_db_url, echo=settings.debug)
 
 
@@ -29,13 +29,12 @@ def get_async_session_maker():
 
 
 def is_postgres_server_version_compatible(
-    server_version: str,
-    required_version: str,
+    server_version: str, required_version: str
 ) -> bool:
     try:
         # server_version can include extra distro/build text.
-        # Extract the first semantic-ish token, e.g. "18.3" from
-        # "PostgreSQL 18.3 (Debian 18.3-1.pgdg)".
+        # Extract the first semantic-ish token
+        # e.g. "18.3" from "PostgreSQL 18.3 (Debian 18.3-1.pgdg)".
         match = re.search(r"\d+\.\d+(?:\.\d+)?", server_version)
         if not match:
             return False
@@ -45,10 +44,7 @@ def is_postgres_server_version_compatible(
     except InvalidVersion:
         return False
 
-    if len(required.release) < 2:
-        return False
-
-    return actual.release[:2] == required.release[:2]
+    return actual.major == required.major
 
 
 def is_local_or_test_env(app_env: AppEnv) -> bool:
@@ -60,6 +56,8 @@ def get_admin_db_url() -> URL:
     # psycopg expects a plain PostgreSQL DSN ("postgresql://..."), while
     # SQLAlchemy-only driver suffixes (like "+asyncpg" / "+psycopg") are for
     # create_engine/create_async_engine URLs.
+    settings = get_settings()
+
     return URL.create(
         drivername="postgresql",
         username=settings.db_user,
@@ -71,7 +69,8 @@ def get_admin_db_url() -> URL:
 
 
 async def ensure_database() -> None:
-    # Only local/test may auto-create/fix DB role ownership
+    settings = get_settings()
+
     can_manage_roles_and_ownership = is_local_or_test_env(settings.app_env)
 
     admin_db_url = get_admin_db_url().render_as_string(hide_password=False)
@@ -136,9 +135,10 @@ async def ensure_database() -> None:
 
 
 async def _verify_and_fix_database_owner(
-    cursor,
-    can_manage_roles_and_ownership: bool,
+    cursor, can_manage_roles_and_ownership: bool
 ) -> None:
+    settings = get_settings()
+
     await cursor.execute(
         """
         SELECT pg_catalog.pg_get_userbyid(d.datdba)
@@ -147,9 +147,9 @@ async def _verify_and_fix_database_owner(
         """,
         (settings.database_name,),
     )
+
     owner_row = await cursor.fetchone()
 
-    # Defensive check: owner should always be resolvable for an existing DB
     if owner_row is None:
         raise RuntimeError("Database owner should never be None!")
 
@@ -161,7 +161,7 @@ async def _verify_and_fix_database_owner(
     if not can_manage_roles_and_ownership:
         raise RuntimeError(
             f"Database '{settings.database_name}' is owned by '{owner}'. "
-            f"Expected it to be owned by '{settings.db_user}' in {settings.app_env}."
+            f"Expected '{settings.db_user}' as owner in {settings.app_env}."
         )
 
     await cursor.execute(
@@ -175,12 +175,16 @@ async def _verify_and_fix_database_owner(
 async def init_db():
     from . import registry  # noqa
 
-    await ensure_database()
+    settings = get_settings()
+
+    if settings.app_env != AppEnv.TEST:
+        await ensure_database()
 
     async with get_engine().begin() as conn:
         postgres_version = str(
             (await conn.execute(text("SHOW server_version"))).scalar_one()
         )
+
         if not is_postgres_server_version_compatible(
             postgres_version,
             REQUIRED_POSTGRES_VERSION,
@@ -191,9 +195,12 @@ async def init_db():
                 f"got server_version={postgres_version}."
             )
 
-        await conn.run_sync(Base.metadata.create_all)
+        if settings.app_env == AppEnv.LOCAL:
+            await conn.run_sync(Base.metadata.create_all)
 
 
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
-    async with get_async_session_maker()() as session:
+    async_session_maker = get_async_session_maker()
+
+    async with async_session_maker() as session:
         yield session

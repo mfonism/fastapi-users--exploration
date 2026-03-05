@@ -1,11 +1,10 @@
-from uuid import uuid4
 
 import pytest
 
 
 @pytest.mark.asyncio
 async def test_register_returns_201_with_user_payload(client) -> None:
-    email = f"alice@example.com"
+    email = "alice@example.com"
     response = await client.post(
         "/auth/register",
         json={"email": email, "password": "strongpass123"},
@@ -21,7 +20,7 @@ async def test_register_returns_201_with_user_payload(client) -> None:
 
 @pytest.mark.asyncio
 async def test_register_returns_201_with_user_payload_again(client) -> None:
-    email = f"alice@example.com"
+    email = "alice@example.com"
     response = await client.post(
         "/auth/register",
         json={"email": email, "password": "strongpass123"},
