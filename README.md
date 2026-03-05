@@ -86,6 +86,45 @@ Defaults are `postgres/postgres/explore` on `localhost:5432`.
 When `APP_ENV=test`, the app automatically uses `${DB_BASE_NAME}_test`.
 Required PostgreSQL version is hardcoded in [`src/explore/db/config.py`](src/explore/db/config.py) as `REQUIRED_POSTGRES_VERSION`.
 
+### Migrations (Alembic)
+
+Schema migrations are managed with Alembic.
+
+For a fresh local setup (after PostgreSQL is running and env vars are set), run:
+
+`uv run alembic upgrade head`
+
+This applies all migrations to the active environment database.
+`APP_ENV` controls which DB is targeted:
+
+- `APP_ENV=local` -> `${DB_BASE_NAME}` (default: `explore`)
+- `APP_ENV=test` -> `${DB_BASE_NAME}_test` (default: `explore_test`)
+
+Examples:
+
+```bash
+# local/dev DB
+uv run alembic upgrade head
+
+# test DB
+APP_ENV=test uv run alembic upgrade head
+```
+
+When you change models and need a new migration:
+
+```bash
+uv run alembic revision --autogenerate -m "describe change"
+uv run alembic upgrade head
+```
+
+Useful checks:
+
+```bash
+uv run alembic current
+uv run alembic heads
+uv run alembic history --verbose
+```
+
 ### PostgreSQL prerequisites
 
 Before running `uv run fastapi dev src/explore/app.py`, PostgreSQL must have:
