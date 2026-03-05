@@ -8,6 +8,12 @@ In which I explore `fastapi-users`
 
 Requires Python `3.14+`.
 
+On startup, the app bootstraps PostgreSQL:
+- Connects to the admin database `postgres`
+- Ensures the app role exists (local/test only)
+- Ensures the app database exists and is owned by that role
+- Creates app tables
+
 ## Testing
 
 Run all tests:
@@ -80,6 +86,53 @@ Defaults are `postgres/postgres/explore` on `localhost:5432`.
 When `APP_ENV=test`, the app automatically uses `${DB_BASE_NAME}_test`.
 Required PostgreSQL version is hardcoded in [`src/explore/db/config.py`](src/explore/db/config.py) as `REQUIRED_POSTGRES_VERSION`.
 
+### PostgreSQL prerequisites
+
+Before running `uv run fastapi dev src/explore/app.py`, PostgreSQL must have:
+
+- Admin database: `postgres` (used for bootstrap operations)
+- A login role matching `DB_USER`
+- Credentials matching `DB_PASSWORD`
+
+Defaults if you do not override env vars:
+
+- `DB_HOST=localhost`
+- `DB_PORT=5432`
+- `DB_USER=postgres`
+- `DB_PASSWORD=postgres`
+- `DB_BASE_NAME=explore`
+
+With those defaults:
+
+- local/dev app DB: `explore`
+- test app DB: `explore_test`
+
+In `local` and `test`, startup may create missing role/database and fix DB ownership.
+In `staging` and `production`, startup is validation-only and fails if role/database are missing or ownership is wrong.
+
+Recommended env files:
+
+- `.env.local` for dev/local DB config
+- `.env.test` for test DB config
+
+Example local/test overrides:
+
+```env
+# .env.local
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_BASE_NAME=explore
+
+# .env.test
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_BASE_NAME=explore
+```
+
 For Redis token storage, a key prefix is also derived from `REDIS_KEY_PREFIX_BASE`:
 
 - non-test: `${REDIS_KEY_PREFIX_BASE}:`
@@ -93,7 +146,7 @@ This app uses bearer auth with Redis-backed tokens.
 
 Start PostgreSQL locally:
 
-`docker run --rm --name explore-postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=explore -p 5432:5432 postgres:18.3`
+`docker run --rm --name explore-postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres:18.3`
 
 Start Redis locally:
 
