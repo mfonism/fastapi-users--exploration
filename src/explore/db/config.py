@@ -11,7 +11,6 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from ..config import AppEnv
 from ..settings import get_settings
-from .base import Base
 
 REQUIRED_POSTGRES_VERSION = "18.3"
 ADMIN_DATABASE_NAME = "postgres"
@@ -173,8 +172,6 @@ async def _verify_and_fix_database_owner(
 
 
 async def init_db():
-    from . import registry  # noqa
-
     settings = get_settings()
 
     if settings.app_env != AppEnv.TEST:
@@ -194,9 +191,6 @@ async def init_db():
                 f"Expected {REQUIRED_POSTGRES_VERSION}.x, "
                 f"got server_version={postgres_version}."
             )
-
-        if settings.app_env == AppEnv.LOCAL:
-            await conn.run_sync(Base.metadata.create_all)
 
 
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:

@@ -12,7 +12,9 @@ On startup, the app bootstraps PostgreSQL:
 - Connects to the admin database `postgres`
 - Ensures the app role exists (local/test only)
 - Ensures the app database exists and is owned by that role
-- Creates app tables
+- Checks PostgreSQL server version compatibility
+
+Startup does not create/alter schema tables. Apply Alembic migrations first.
 
 ## Testing
 
@@ -192,6 +194,8 @@ Start Redis locally:
 `docker run --rm -p 6379:6379 redis:7-alpine`
 
 Start the API:
+
+`uv run alembic upgrade head`
 
 `uv run fastapi dev src/explore/app.py`
 
