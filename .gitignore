@@ -41,3 +41,5 @@ dist/
 *.rdb
 *.aof
 *.pid
+
+todo.*
