@@ -18,7 +18,38 @@ docker run --rm --name explore-redis -p 6379:6379 redis:7-alpine
 
 ## First-time local setup
 
-<ToDO: are there any default env vars to set up? What about needing a postgres user with password postgres in postgres db>
+### 1) Create your `.env` file
+
+Copy the example file:
+
+```bash
+cp .env.example .env
+```
+
+Then update values in `.env` for your local machine.
+
+At minimum, confirm these DB settings are correct:
+
+- `DB_HOST`: PostgreSQL host (usually `localhost`)
+- `DB_PORT`: PostgreSQL port (usually `5432`)
+- `DB_USER`: PostgreSQL login role to use
+- `DB_PASSWORD`: password for that role
+- `DB_BASE_NAME`: base app DB name (`explore` -> test DB becomes `explore_test`)
+
+Defaults in `.env.example` are:
+
+- `DB_HOST=localhost`
+- `DB_PORT=5432`
+- `DB_USER=postgres`
+- `DB_PASSWORD=postgres`
+- `DB_BASE_NAME=explore`
+
+If your local Postgres uses different credentials, change them here before running setup.
+
+### 2) Run setup commands
+
+`db-bootstrap` connects to admin DB `postgres` using `DB_USER`/`DB_PASSWORD`,
+then ensures the app database exists and has the expected owner.
 
 Run these commands in order:
 
