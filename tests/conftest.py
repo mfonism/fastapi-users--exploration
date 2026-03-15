@@ -7,44 +7,35 @@ from alembic.config import Config
 from sqlalchemy import event
 from sqlalchemy.ext.asyncio import AsyncSession
 
+# Set APP_ENV before importing project modules to ensure
+# the `settings` object is initialized with the correct APP_ENV
+os.environ.setdefault("APP_ENV", "test")
+
 from alembic import command
-
-
-def _configure_test_env() -> None:
-    os.environ["APP_ENV"] = "test"
+from explore.app import app
+from explore.db.config import ensure_database, get_async_session, get_engine
+from explore.settings import BASE_DIR
 
 
 @pytest_asyncio.fixture(scope="session")
 async def initialize_test_environment():
-    _configure_test_env()
-
-    # Delay project imports until APP_ENV is set so test-only setup happens
-    # after the environment variable is in place.
-    import explore.db.config as db_config
-    from explore.settings import BASE_DIR
-
     alembic_cfg = Config(BASE_DIR / "alembic.ini")
 
-    await db_config.ensure_database()
+    await ensure_database()
 
     await asyncio.to_thread(command.upgrade, alembic_cfg, "head")
 
     yield
 
-    engine = db_config.get_engine()
+    engine = get_engine()
 
     await engine.dispose()
 
-    db_config.get_engine.cache_clear()
+    get_engine.cache_clear()
 
 
 @pytest_asyncio.fixture
 async def client(initialize_test_environment: None):
-    # Delay project imports until APP_ENV is set so cached settings/engine
-    # are built for the test environment, not whichever env imported first.
-    from explore.app import app
-    from explore.db.config import get_async_session, get_engine
-
     engine = get_engine()
 
     async with engine.connect() as connection:
