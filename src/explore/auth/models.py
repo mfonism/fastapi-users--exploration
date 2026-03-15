@@ -4,9 +4,10 @@ from datetime import datetime, timezone
 from fastapi import Depends, Request, Response
 from fastapi_users import BaseUserManager, UUIDIDMixin
 from fastapi_users.db import SQLAlchemyUserDatabase
-from sqlalchemy import DateTime, String
+from sqlalchemy import DateTime, String, func, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.schema import FetchedValue
 
 from ..db.base import Base
 from ..db.config import get_async_session
@@ -21,7 +22,10 @@ class User(Base):
     __tablename__ = "user"
 
     # Identity
-    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid7)
+    id: Mapped[uuid.UUID] = mapped_column(
+        primary_key=True,
+        server_default=text("uuidv7()"),
+    )
     email: Mapped[str] = mapped_column(
         String(length=320), unique=True, index=True, nullable=False
     )
@@ -56,10 +60,13 @@ class User(Base):
 
     # Audit timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, default=utcnow
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, default=utcnow, onupdate=utcnow
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        server_onupdate=FetchedValue(),
     )
 
     @property
