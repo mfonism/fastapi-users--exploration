@@ -29,9 +29,16 @@ async def initialize_test_environment():
 
 
 @pytest_asyncio.fixture
-async def client(initialize_test_environment: None):
+async def engine(initialize_test_environment: None):
     engine = create_async_engine(settings.core_db_url, echo=settings.debug)
+    try:
+        yield engine
+    finally:
+        await engine.dispose()
 
+
+@pytest_asyncio.fixture
+async def session(engine):
     async with engine.connect() as connection:
         transaction = await connection.begin()
 
@@ -46,24 +53,28 @@ async def client(initialize_test_environment: None):
             if transaction_.nested and not transaction_._parent.nested:
                 session_.begin_nested()
 
-        async def override_get_async_session():
-            yield session
-
-        app.dependency_overrides[get_async_session] = override_get_async_session
-
         try:
-            transport = httpx.ASGITransport(app=app)
-
-            async with httpx.AsyncClient(
-                transport=transport,
-                base_url="http://testserver",
-            ) as test_client:
-                yield test_client
-
+            yield session
         finally:
-            app.dependency_overrides.pop(get_async_session, None)
-
             await session.close()
-
             await transaction.rollback()
-            await engine.dispose()
+
+
+@pytest_asyncio.fixture
+async def client(session):
+    async def override_get_async_session():
+        yield session
+
+    app.dependency_overrides[get_async_session] = override_get_async_session
+
+    try:
+        transport = httpx.ASGITransport(app=app)
+
+        async with httpx.AsyncClient(
+            transport=transport,
+            base_url="http://testserver",
+        ) as test_client:
+            yield test_client
+
+    finally:
+        app.dependency_overrides.pop(get_async_session, None)
