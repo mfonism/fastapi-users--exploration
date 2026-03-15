@@ -39,6 +39,8 @@ class TestDbConfig(unittest.TestCase):
         # override settings object in module to control values
         from types import SimpleNamespace
 
+        import explore.db.config as cfg
+
         fake = SimpleNamespace(
             db_user="user+name",
             db_password=SimpleNamespace(get_secret_value=lambda: "p@ss word"),
@@ -46,10 +48,10 @@ class TestDbConfig(unittest.TestCase):
             db_host="host",
             db_port=5432,
         )
-        # assign into config module
-        import explore.db.config as cfg
-
+        original_settings = cfg.settings
         cfg.settings = fake
+        self.addCleanup(setattr, cfg, "settings", original_settings)
+
         url = cfg.get_admin_db_url()
         self.assertIsInstance(url, URL)
         self.assertEqual(url.drivername, "postgresql")

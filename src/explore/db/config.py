@@ -10,7 +10,7 @@ from sqlalchemy.engine import URL
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from ..config import AppEnv
-from ..settings import get_settings
+from ..settings import settings
 
 REQUIRED_POSTGRES_VERSION = "18.3"
 ADMIN_DATABASE_NAME = "postgres"
@@ -18,7 +18,6 @@ ADMIN_DATABASE_NAME = "postgres"
 
 @lru_cache
 def get_engine():
-    settings = get_settings()
     return create_async_engine(settings.core_db_url, echo=settings.debug)
 
 
@@ -55,8 +54,6 @@ def get_admin_db_url() -> URL:
     # psycopg expects a plain PostgreSQL DSN ("postgresql://..."), while
     # SQLAlchemy-only driver suffixes (like "+asyncpg" / "+psycopg") are for
     # create_engine/create_async_engine URLs.
-    settings = get_settings()
-
     return URL.create(
         drivername="postgresql",
         username=settings.db_user,
@@ -68,8 +65,6 @@ def get_admin_db_url() -> URL:
 
 
 async def ensure_database() -> None:
-    settings = get_settings()
-
     can_manage_roles_and_ownership = is_local_or_test_env(settings.app_env)
 
     admin_db_url = get_admin_db_url().render_as_string(hide_password=False)
@@ -138,8 +133,6 @@ async def ensure_database() -> None:
 async def _verify_and_fix_database_owner(
     cursor, can_manage_roles_and_ownership: bool
 ) -> None:
-    settings = get_settings()
-
     await cursor.execute(
         """
         SELECT pg_catalog.pg_get_userbyid(d.datdba)
@@ -174,8 +167,6 @@ async def _verify_and_fix_database_owner(
 
 
 async def init_db():
-    settings = get_settings()
-
     if settings.app_env != AppEnv.TEST:
         await ensure_database()
 

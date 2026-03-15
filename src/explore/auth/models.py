@@ -10,9 +10,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from ..db.base import Base
 from ..db.config import get_async_session
-from ..settings import get_settings
-
-settings = get_settings()
+from ..settings import settings
 
 
 def utcnow() -> datetime:

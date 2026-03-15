@@ -5,9 +5,7 @@ from fastapi_users.authentication import (
     RedisStrategy,
 )
 
-from ...settings import get_settings
-
-settings = get_settings()
+from ...settings import settings
 
 transport = BearerTransport(tokenUrl="auth/login")
 

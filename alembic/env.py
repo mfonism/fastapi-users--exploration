@@ -8,10 +8,9 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
 from explore.db import registry  # noqa: F401
 from explore.db.base import Base
-from explore.settings import get_settings
+from explore.settings import settings
 
 config = context.config
-settings = get_settings()
 database_url = settings.core_db_url.render_as_string(hide_password=False)
 config.set_main_option("sqlalchemy.url", database_url)
 

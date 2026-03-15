@@ -4,7 +4,7 @@ from fastapi import FastAPI
 
 from .auth.routes import router as auth_router
 from .db.config import init_db
-from .settings import get_settings
+from .settings import settings
 
 
 @asynccontextmanager
@@ -12,8 +12,6 @@ async def lifespan(app: FastAPI):
     await init_db()
     yield
 
-
-settings = get_settings()
 
 app = FastAPI(lifespan=lifespan, debug=settings.debug)
 

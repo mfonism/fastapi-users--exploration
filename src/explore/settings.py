@@ -1,5 +1,4 @@
 import os
-from functools import lru_cache
 from pathlib import Path
 
 from pydantic import SecretStr, field_validator, model_validator
@@ -90,8 +89,7 @@ class Settings(BaseSettings):
         )
 
 
-@lru_cache
-def get_settings() -> Settings:
+def _get_settings() -> Settings:
     app_env = normalize_app_env(os.getenv("APP_ENV"))
     env_files = resolve_env_files(app_env, BASE_DIR)
     env_file_arg: str | tuple[str, ...] | None
@@ -106,3 +104,6 @@ def get_settings() -> Settings:
         _env_file=env_file_arg,
         app_env=app_env,
     )
+
+
+settings = _get_settings()

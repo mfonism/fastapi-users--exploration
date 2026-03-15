@@ -18,27 +18,24 @@ def _configure_test_env() -> None:
 async def initialize_test_environment():
     _configure_test_env()
 
-    # Delay project imports until APP_ENV is set so cached settings/engine
-    # are built for the test environment, not whichever env imported first.
-    from explore.db.config import ensure_database, get_engine
-    from explore.settings import BASE_DIR, get_settings
+    # Delay project imports until APP_ENV is set so test-only setup happens
+    # after the environment variable is in place.
+    import explore.db.config as db_config
+    from explore.settings import BASE_DIR
 
     alembic_cfg = Config(BASE_DIR / "alembic.ini")
 
-    get_settings.cache_clear()
-
-    await ensure_database()
+    await db_config.ensure_database()
 
     await asyncio.to_thread(command.upgrade, alembic_cfg, "head")
 
     yield
 
-    engine = get_engine()
+    engine = db_config.get_engine()
 
     await engine.dispose()
 
-    get_engine.cache_clear()
-    get_settings.cache_clear()
+    db_config.get_engine.cache_clear()
 
 
 @pytest_asyncio.fixture
