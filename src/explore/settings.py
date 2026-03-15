@@ -5,7 +5,7 @@ from pydantic import SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy.engine import URL
 
-from .config import AppEnv, normalize_app_env, resolve_env_files
+from .env import AppEnv, normalize_app_env, resolve_env_files
 
 BASE_DIR = Path(__file__).parent.parent.parent.resolve()
 

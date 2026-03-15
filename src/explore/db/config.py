@@ -9,7 +9,7 @@ from sqlalchemy import text
 from sqlalchemy.engine import URL
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from ..config import AppEnv
+from ..env import AppEnv
 from ..settings import settings
 
 

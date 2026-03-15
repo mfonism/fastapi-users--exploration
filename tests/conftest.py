@@ -7,7 +7,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 # Set APP_ENV before importing project modules to ensure
 # the `settings` object is initialized with the correct APP_ENV
-os.environ.setdefault("APP_ENV", "test")
+from explore.env import AppEnv
+
+os.environ.setdefault("APP_ENV", AppEnv.TEST.value)
 
 from explore.app import app
 from explore.db.config import (

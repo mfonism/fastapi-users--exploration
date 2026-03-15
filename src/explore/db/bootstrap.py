@@ -8,7 +8,7 @@ from alembic.config import Config
 
 from alembic import command
 
-from ..config import AppEnv
+from ..env import AppEnv
 
 
 def parse_args() -> argparse.Namespace:
