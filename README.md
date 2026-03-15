@@ -72,12 +72,14 @@ Important:
 
 - `uv run db-bootstrap` bootstraps both `local` and `test` by default.
 - Use `uv run db-bootstrap --app-env test` to prepare only the test DB.
+- Use `uv run db-migrate` when databases already exist and you only need to apply pending migrations.
 - Startup checks DB connectivity/version, but does not create tables or run migrations.
 
 ## Daily local workflow
 
 ```bash
 uv run db-bootstrap
+uv run db-migrate --app-env test
 uv run pytest
 uv run fastapi dev src/explore --app app
 ```
@@ -113,7 +115,8 @@ Notes:
 - Test fixtures set `APP_ENV=test`.
 - Pytest assumes the test DB has already been bootstrapped and migrated.
 - Before running tests for the first time, run `uv run db-bootstrap`.
-- To prepare only the test DB, run `uv run db-bootstrap --app-env test`.
+- To prepare only the test DB from scratch, run `uv run db-bootstrap --app-env test`.
+- To apply new schema changes to an existing test DB, run `uv run db-migrate --app-env test`.
 
 ## Configuration
 
@@ -190,6 +193,13 @@ To bootstrap only one environment:
 ```bash
 uv run db-bootstrap --app-env local
 uv run db-bootstrap --app-env test
+```
+
+Migration-only command:
+
+```bash
+uv run db-migrate
+uv run db-migrate --app-env test
 ```
 
 ## API quick checks

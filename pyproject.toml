@@ -21,6 +21,7 @@ dependencies = [
 [project.scripts]
 explore = "explore:main"
 db-bootstrap = "explore.db.bootstrap:main"
+db-migrate = "explore.db.migrate:main"
 
 [build-system]
 requires = ["hatchling"]
