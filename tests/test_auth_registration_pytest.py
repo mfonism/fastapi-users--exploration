@@ -2,6 +2,8 @@ from datetime import UTC, datetime
 
 import pytest
 
+TERMS_ACCEPTED_AT = datetime(2026, 3, 15, 12, 0, tzinfo=UTC).isoformat()
+
 
 @pytest.mark.asyncio
 async def test_register_creates_user_and_returns_public_fields(client) -> None:
@@ -13,6 +15,7 @@ async def test_register_creates_user_and_returns_public_fields(client) -> None:
             "email": email,
             "full_name": "Alice Example",
             "password": "strongpass123",
+            "terms_accepted_at": TERMS_ACCEPTED_AT,
         },
     )
 
@@ -29,7 +32,9 @@ async def test_register_creates_user_and_returns_public_fields(client) -> None:
     assert payload["deactivated_at"] is None
     assert payload["deleted_at"] is None
     assert payload["verified_at"] is None
-    assert payload["terms_accepted_at"] is None
+    assert datetime.fromisoformat(
+        payload["terms_accepted_at"].replace("Z", "+00:00")
+    ) == datetime.fromisoformat(TERMS_ACCEPTED_AT)
     assert "password" not in payload
     assert "hashed_password" not in payload
 
@@ -44,6 +49,7 @@ async def test_register_allows_same_email_in_a_new_test(client) -> None:
             "email": email,
             "full_name": "Alice Example",
             "password": "strongpass123",
+            "terms_accepted_at": TERMS_ACCEPTED_AT,
         },
     )
 
@@ -59,7 +65,7 @@ async def test_register_allows_same_email_in_a_new_test(client) -> None:
 @pytest.mark.asyncio
 async def test_register_persists_terms_accepted_at(client) -> None:
     email = "terms@example.com"
-    accepted_at = datetime(2026, 3, 15, 12, 0, tzinfo=UTC).isoformat()
+    accepted_at = TERMS_ACCEPTED_AT
 
     response = await client.post(
         "/auth/register",
@@ -88,6 +94,7 @@ async def test_register_rejects_duplicate_email(client) -> None:
         "email": email,
         "full_name": "Alice Example",
         "password": "strongpass123",
+        "terms_accepted_at": TERMS_ACCEPTED_AT,
     }
 
     first_response = await client.post("/auth/register", json=payload)
@@ -102,7 +109,25 @@ async def test_register_rejects_duplicate_email(client) -> None:
 async def test_register_requires_full_name(client) -> None:
     response = await client.post(
         "/auth/register",
-        json={"email": "missing-name@example.com", "password": "strongpass123"},
+        json={
+            "email": "missing-name@example.com",
+            "password": "strongpass123",
+            "terms_accepted_at": TERMS_ACCEPTED_AT,
+        },
+    )
+
+    assert response.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_register_requires_terms_accepted_at(client) -> None:
+    response = await client.post(
+        "/auth/register",
+        json={
+            "email": "missing-terms@example.com",
+            "full_name": "Alice Example",
+            "password": "strongpass123",
+        },
     )
 
     assert response.status_code == 422

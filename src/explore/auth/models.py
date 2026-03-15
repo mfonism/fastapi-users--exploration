@@ -45,8 +45,8 @@ class User(Base):
     )
 
     # Compliance
-    terms_accepted_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
+    terms_accepted_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False
     )
 
     # Activity
