@@ -16,16 +16,6 @@ REQUIRED_POSTGRES_VERSION = "18.3"
 ADMIN_DATABASE_NAME = "postgres"
 
 
-@lru_cache
-def get_engine():
-    return create_async_engine(settings.core_db_url, echo=settings.debug)
-
-
-@lru_cache
-def get_async_session_maker():
-    return async_sessionmaker(get_engine(), expire_on_commit=False)
-
-
 def is_postgres_server_version_compatible(
     server_version: str, required_version: str
 ) -> bool:
@@ -186,8 +176,18 @@ async def init_db():
             )
 
 
+@lru_cache
+def get_engine():
+    return create_async_engine(settings.core_db_url, echo=settings.debug)
+
+
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
     async_session_maker = get_async_session_maker()
 
     async with async_session_maker() as session:
         yield session
+
+
+@lru_cache
+def get_async_session_maker():
+    return async_sessionmaker(get_engine(), expire_on_commit=False)

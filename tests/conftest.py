@@ -5,7 +5,7 @@ import httpx
 import pytest_asyncio
 from alembic.config import Config
 from sqlalchemy import event
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 # Set APP_ENV before importing project modules to ensure
 # the `settings` object is initialized with the correct APP_ENV
@@ -13,8 +13,8 @@ os.environ.setdefault("APP_ENV", "test")
 
 from alembic import command
 from explore.app import app
-from explore.db.config import ensure_database, get_async_session, get_engine
-from explore.settings import BASE_DIR
+from explore.db.config import ensure_database, get_async_session
+from explore.settings import BASE_DIR, settings
 
 
 @pytest_asyncio.fixture(scope="session")
@@ -27,16 +27,10 @@ async def initialize_test_environment():
 
     yield
 
-    engine = get_engine()
-
-    await engine.dispose()
-
-    get_engine.cache_clear()
-
 
 @pytest_asyncio.fixture
 async def client(initialize_test_environment: None):
-    engine = get_engine()
+    engine = create_async_engine(settings.core_db_url, echo=settings.debug)
 
     async with engine.connect() as connection:
         transaction = await connection.begin()
@@ -73,4 +67,3 @@ async def client(initialize_test_environment: None):
 
             await transaction.rollback()
             await engine.dispose()
-            get_engine.cache_clear()
