@@ -1,9 +1,9 @@
+import re
 from collections.abc import AsyncGenerator
 from functools import lru_cache
-import re
 
-from packaging.version import InvalidVersion, Version
 import psycopg
+from packaging.version import InvalidVersion, Version
 from psycopg import errors, sql
 from sqlalchemy import text
 from sqlalchemy.engine import URL
@@ -117,7 +117,8 @@ async def ensure_database() -> None:
                 )
                 if await cursor.fetchone() is None:
                     raise RuntimeError(
-                        f"Role '{settings.db_user}' does not exist in {settings.app_env}."
+                        f"Role '{settings.db_user}' does not exist in "
+                        f"{settings.app_env}."
                     )
 
                 await cursor.execute(
@@ -126,7 +127,8 @@ async def ensure_database() -> None:
                 )
                 if await cursor.fetchone() is None:
                     raise RuntimeError(
-                        f"Database '{settings.database_name}' does not exist in {settings.app_env}."
+                        f"Database '{settings.database_name}' does not exist in "
+                        f"{settings.app_env}."
                     )
 
             # Verify (and if allowed, fix) owner drift

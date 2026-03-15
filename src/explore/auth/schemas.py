@@ -1,9 +1,8 @@
 import uuid
 from datetime import datetime
 
-from pydantic import ConfigDict, EmailStr
-
 from fastapi_users import schemas
+from pydantic import ConfigDict, EmailStr
 
 
 class UserRead(schemas.CreateUpdateDictModel):

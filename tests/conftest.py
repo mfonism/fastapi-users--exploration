@@ -3,10 +3,11 @@ import os
 
 import httpx
 import pytest_asyncio
-from alembic import command
 from alembic.config import Config
 from sqlalchemy import event
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from alembic import command
 
 
 def _configure_test_env() -> None:
@@ -19,8 +20,8 @@ async def initialize_test_environment():
 
     # Delay project imports until APP_ENV is set so cached settings/engine
     # are built for the test environment, not whichever env imported first.
-    from explore.settings import BASE_DIR, get_settings
     from explore.db.config import ensure_database, get_engine
+    from explore.settings import BASE_DIR, get_settings
 
     alembic_cfg = Config(BASE_DIR / "alembic.ini")
 
