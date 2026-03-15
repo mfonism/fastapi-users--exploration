@@ -84,6 +84,24 @@ uv run pytest
 uv run fastapi dev src/explore --app app
 ```
 
+## Formatting and linting
+
+Install hooks once:
+
+```bash
+uv run pre-commit install
+```
+
+Run formatting/linting checks:
+
+```bash
+uv run pre-commit run --all-files
+```
+
+Hooks configured:
+
+- `ruff` (autofix + lint checks)
+
 ## Test workflow
 
 Run tests with:
