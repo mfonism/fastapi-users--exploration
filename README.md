@@ -49,7 +49,8 @@ If your local Postgres uses different credentials, change them here before runni
 ### 2) Run setup commands
 
 `db-bootstrap` connects to admin DB `postgres` using `DB_USER`/`DB_PASSWORD`,
-then ensures the app database exists and has the expected owner.
+then ensures the requested database(s) exist, have the expected owner, and are
+migrated to the latest schema.
 
 Run these commands in order:
 
@@ -57,29 +58,26 @@ Run these commands in order:
 # 1) install dependencies
 uv sync
 
-# 2) ensure local DB exists (role/db/owner checks/bootstrap)
+# 2) ensure local + test DBs exist and are migrated
 uv run db-bootstrap
 
-# 3) apply schema migrations
-uv run alembic upgrade head
-
-# 4) optional: verify migration state
+# 3) optional: verify migration state
 uv run alembic current
 
-# 5) start API
+# 4) start API
 uv run fastapi dev src/explore/app.py
 ```
 
 Important:
 
-- Do not start the API before running migrations.
-- Startup checks DB connectivity/version, but does not create tables.
+- `uv run db-bootstrap` bootstraps both `local` and `test` by default.
+- Use `uv run db-bootstrap --app-env test` to prepare only the test DB.
+- Startup checks DB connectivity/version, but does not create tables or run migrations.
 
 ## Daily local workflow
 
 ```bash
 uv run db-bootstrap
-uv run alembic upgrade head
 uv run pytest
 uv run fastapi dev src/explore --app app
 ```
@@ -113,8 +111,9 @@ uv run pytest
 Notes:
 
 - Test fixtures set `APP_ENV=test`.
-- Current pytest setup bootstraps and migrates the test DB in fixtures.
-- You usually do not need to run manual test bootstrap/migration before `uv run pytest`.
+- Pytest assumes the test DB has already been bootstrapped and migrated.
+- Before running tests for the first time, run `uv run db-bootstrap`.
+- To prepare only the test DB, run `uv run db-bootstrap --app-env test`.
 
 ## Configuration
 
@@ -184,7 +183,14 @@ DB bootstrap command from `pyproject.toml`:
 uv run db-bootstrap
 ```
 
-This runs `explore.db.bootstrap:main`, which calls `ensure_database()`.
+By default this bootstraps and migrates both the `local` and `test` databases.
+
+To bootstrap only one environment:
+
+```bash
+uv run db-bootstrap --app-env local
+uv run db-bootstrap --app-env test
+```
 
 ## API quick checks
 

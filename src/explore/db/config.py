@@ -12,6 +12,32 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from ..config import AppEnv
 from ..settings import settings
 
+
+async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
+    async_session_maker = get_async_session_maker()
+
+    async with async_session_maker() as session:
+        yield session
+
+
+@lru_cache
+def get_engine():
+    return create_engine()
+
+
+def create_engine():
+    return create_async_engine(settings.core_db_url, echo=settings.debug)
+
+
+@lru_cache
+def get_async_session_maker():
+    return create_async_session_maker(get_engine())
+
+
+def create_async_session_maker(engine):
+    return async_sessionmaker(engine, expire_on_commit=False)
+
+
 REQUIRED_POSTGRES_VERSION = "18.3"
 ADMIN_DATABASE_NAME = "postgres"
 
@@ -174,20 +200,3 @@ async def init_db():
                 f"Expected {REQUIRED_POSTGRES_VERSION}.x, "
                 f"got server_version={postgres_version}."
             )
-
-
-@lru_cache
-def get_engine():
-    return create_async_engine(settings.core_db_url, echo=settings.debug)
-
-
-async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
-    async_session_maker = get_async_session_maker()
-
-    async with async_session_maker() as session:
-        yield session
-
-
-@lru_cache
-def get_async_session_maker():
-    return async_sessionmaker(get_engine(), expire_on_commit=False)

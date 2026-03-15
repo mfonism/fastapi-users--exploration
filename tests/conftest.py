@@ -1,36 +1,24 @@
-import asyncio
 import os
 
 import httpx
 import pytest_asyncio
-from alembic.config import Config
 from sqlalchemy import event
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncSession
 
 # Set APP_ENV before importing project modules to ensure
 # the `settings` object is initialized with the correct APP_ENV
 os.environ.setdefault("APP_ENV", "test")
 
-from alembic import command
 from explore.app import app
-from explore.db.config import ensure_database, get_async_session
-from explore.settings import BASE_DIR, settings
-
-
-@pytest_asyncio.fixture(scope="session")
-async def initialize_test_environment():
-    alembic_cfg = Config(BASE_DIR / "alembic.ini")
-
-    await ensure_database()
-
-    await asyncio.to_thread(command.upgrade, alembic_cfg, "head")
-
-    yield
+from explore.db.config import (
+    create_engine,
+    get_async_session,
+)
 
 
 @pytest_asyncio.fixture
-async def engine(initialize_test_environment: None):
-    engine = create_async_engine(settings.core_db_url, echo=settings.debug)
+async def engine():
+    engine = create_engine()
     try:
         yield engine
     finally:
