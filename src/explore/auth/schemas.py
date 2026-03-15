@@ -8,6 +8,7 @@ from pydantic import ConfigDict, EmailStr
 class UserRead(schemas.CreateUpdateDictModel):
     id: uuid.UUID
     email: EmailStr
+    full_name: str
     created_at: datetime
     updated_at: datetime
     last_login_at: datetime | None = None
@@ -22,6 +23,7 @@ class UserRead(schemas.CreateUpdateDictModel):
 
 class UserCreate(schemas.CreateUpdateDictModel):
     email: EmailStr
+    full_name: str
     password: str
     terms_accepted_at: datetime | None = None
 
@@ -29,6 +31,7 @@ class UserCreate(schemas.CreateUpdateDictModel):
 class UserUpdate(schemas.CreateUpdateDictModel):
     password: str | None = None
     email: EmailStr | None = None
+    full_name: str | None = None
     superuser_granted_at: datetime | None = None
     deactivated_at: datetime | None = None
     deleted_at: datetime | None = None
