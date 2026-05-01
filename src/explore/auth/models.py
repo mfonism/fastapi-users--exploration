@@ -66,6 +66,11 @@ class User(Base):
         server_onupdate=FetchedValue(),
     )
 
+    def __repr__(self) -> str:
+        return (
+            f"User(id={self.id!r}, email={self.email!r}, full_name={self.full_name!r})"
+        )
+
     @property
     def is_active(self) -> bool:
         return self.deactivated_at is None

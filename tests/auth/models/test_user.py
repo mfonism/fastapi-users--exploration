@@ -12,6 +12,15 @@ from tests.factories.user import (
 )
 
 
+def test_repr_excludes_hashed_password() -> None:
+    user = build_signed_up_user(hashed_password="super-secret-hash")
+
+    representation = repr(user)
+
+    assert "hashed_password" not in representation
+    assert "super-secret-hash" not in representation
+
+
 def test_is_verified_tracks_verified_at(mock_utcnow) -> None:
     user = build_signed_up_user()
     assert user.verified_at is None
