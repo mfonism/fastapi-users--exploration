@@ -4,6 +4,7 @@ from datetime import UTC, datetime
 import pytest
 
 from explore.auth.models import User
+from tests.factories.user import build_signed_up_user
 
 
 @pytest.mark.asyncio
@@ -31,9 +32,9 @@ async def test_register_creates_user(client, password_helper, session) -> None:
     assert user.full_name == "Alice Example"
     assert user.hashed_password != "strongpass123"
     assert user.terms_accepted_at == terms_accepted_at
-    assert user.is_active is True
-    assert user.is_verified is False
-    assert user.is_superuser is False
+    assert user.deactivated_at is None
+    assert user.verified_at is None
+    assert user.superuser_granted_at is None
     assert user.last_login_at is None
 
     password_verified, _ = password_helper.verify_and_update(
@@ -88,33 +89,18 @@ async def test_register_returns_created_user_data(client) -> None:
 
 
 @pytest.mark.asyncio
-async def test_register_rejects_duplicate_email(client, mock_utcnow) -> None:
-    DUPLICATE_EMAIL = "alice@example.com"
+async def test_register_rejects_duplicate_email(client, session) -> None:
+    duplicate_email = "alice@example.com"
+    session.add(build_signed_up_user(email=duplicate_email))
+    await session.flush()
 
-    alice_accepted_terms_at = datetime(2000, 10, 10, 0, 0, tzinfo=UTC)
-    alice_registered_at = datetime(2000, 10, 10, 0, 1, tzinfo=UTC)
-    eve_accepted_terms_at = datetime(2000, 10, 10, 0, 5, tzinfo=UTC)
-    eve_registered_at = datetime(2000, 10, 10, 0, 10, tzinfo=UTC)
-
-    mock_utcnow.return_value = alice_registered_at
-    await client.post(
-        "/auth/register",
-        json={
-            "email": DUPLICATE_EMAIL,
-            "full_name": "Alice Example",
-            "password": "strongpass123",
-            "terms_accepted_at": alice_accepted_terms_at.isoformat(),
-        },
-    )
-
-    mock_utcnow.return_value = eve_registered_at
     response = await client.post(
         "/auth/register",
         json={
-            "email": DUPLICATE_EMAIL,
+            "email": duplicate_email,
             "full_name": "Eve All",
             "password": "anotherstrongpass456",
-            "terms_accepted_at": eve_accepted_terms_at.isoformat(),
+            "terms_accepted_at": datetime(2000, 10, 10, 0, 5, tzinfo=UTC).isoformat(),
         },
     )
 
