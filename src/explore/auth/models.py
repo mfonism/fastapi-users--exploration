@@ -78,6 +78,17 @@ class User(Base):
         self.deactivated_at = None if value else clock.utcnow()
 
     @property
+    def is_deleted(self) -> bool:
+        return self.deleted_at is not None
+
+    @is_deleted.setter
+    def is_deleted(self, value: bool) -> None:
+        if value == self.is_deleted:
+            return
+
+        self.deleted_at = clock.utcnow() if value else None
+
+    @property
     def is_verified(self) -> bool:
         return self.verified_at is not None
 

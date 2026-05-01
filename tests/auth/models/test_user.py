@@ -4,6 +4,7 @@ import pytest
 
 from explore.auth.models import UserManager
 from tests.factories.user import (
+    build_deleted_user,
     build_plain_user,
     build_signed_up_user,
     build_superuser,
@@ -90,6 +91,39 @@ def test_is_active_true_is_noop_if_already_active() -> None:
     user.is_active = True
 
     assert user.deactivated_at is None
+
+
+def test_is_deleted_tracks_deleted_at(mock_utcnow) -> None:
+    user = build_plain_user()
+    assert user.deleted_at is None
+
+    timestamp = datetime(2000, 10, 10, 0, 0, tzinfo=UTC)
+    mock_utcnow.return_value = timestamp
+
+    user.is_deleted = True
+
+    assert user.deleted_at == timestamp
+
+    user.is_deleted = False
+
+    assert user.deleted_at is None
+
+
+def test_is_deleted_true_is_noop_if_already_deleted() -> None:
+    deleted_at = datetime(2000, 10, 10, 0, 0, tzinfo=UTC)
+    user = build_deleted_user(deleted_at=deleted_at)
+
+    user.is_deleted = True
+
+    assert user.deleted_at == deleted_at
+
+
+def test_is_deleted_false_is_noop_if_not_deleted() -> None:
+    user = build_plain_user()
+
+    user.is_deleted = False
+
+    assert user.deleted_at is None
 
 
 def test_is_superuser_tracks_superuser_granted_at(mock_utcnow) -> None:

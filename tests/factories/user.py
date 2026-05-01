@@ -4,6 +4,7 @@ from datetime import UTC, datetime
 from explore.auth.models import User
 
 __all__ = [
+    "build_deleted_user",
     "build_plain_user",
     "build_signed_up_user",
     "build_superuser",
@@ -15,6 +16,7 @@ SIGNED_UP_AT = datetime(2000, 1, 2, 3, 0, tzinfo=UTC)
 VERIFIED_AT = datetime(2000, 1, 2, 4, 0, tzinfo=UTC)
 FIRST_LOGIN_AT = datetime(2000, 1, 2, 5, 0, tzinfo=UTC)
 SUPERUSER_GRANTED_AT = datetime(2000, 1, 2, 6, 0, tzinfo=UTC)
+DELETED_AT = datetime(2000, 1, 2, 7, 0, tzinfo=UTC)
 
 _SIGNED_UP_STATE = {
     "email": "alice@example.com",
@@ -35,6 +37,10 @@ _LOGGED_IN_STATE = _VERIFIED_STATE | {
 
 _SUPERUSER_STATE = _LOGGED_IN_STATE | {
     "superuser_granted_at": SUPERUSER_GRANTED_AT,
+}
+
+_DELETED_STATE = _LOGGED_IN_STATE | {
+    "deleted_at": DELETED_AT,
 }
 
 
@@ -62,3 +68,7 @@ build_user = build_plain_user
 
 def build_superuser(**overrides: object) -> User:
     return _build_user(_SUPERUSER_STATE, overrides)
+
+
+def build_deleted_user(**overrides: object) -> User:
+    return _build_user(_DELETED_STATE, overrides)
