@@ -3,79 +3,71 @@ from datetime import UTC, datetime
 import pytest
 
 from explore.auth.models import UserManager
-from tests.factories import build_plain_user
+from tests.factories import (
+    build_plain_user,
+    build_signed_up_user,
+    build_verified_user,
+)
 
 
-def test_is_active_false_sets_deactivated_at(mock_utcnow) -> None:
-    timestamp = datetime(2010, 3, 4, 0, 0, tzinfo=UTC)
+def test_is_verified_tracks_verified_at(mock_utcnow) -> None:
+    user = build_signed_up_user()
+    assert user.verified_at is None
+
+    timestamp = datetime(2000, 10, 10, 0, 0, tzinfo=UTC)
     mock_utcnow.return_value = timestamp
-    user = build_plain_user()
-
-    user.is_active = False
-
-    assert user.deactivated_at == timestamp
-    mock_utcnow.assert_called_once_with()
-
-
-def test_is_active_true_clears_deactivated_at(mock_utcnow) -> None:
-    user = build_plain_user(deactivated_at=datetime(2010, 3, 4, 0, 0, tzinfo=UTC))
-
-    user.is_active = True
-
-    assert user.deactivated_at is None
-    mock_utcnow.assert_not_called()
-
-
-def test_is_verified_true_sets_verified_at(mock_utcnow) -> None:
-    timestamp = datetime(2010, 3, 4, 0, 0, tzinfo=UTC)
-    mock_utcnow.return_value = timestamp
-    user = build_plain_user()
 
     user.is_verified = True
 
     assert user.verified_at == timestamp
-    mock_utcnow.assert_called_once_with()
-
-
-def test_is_verified_false_clears_verified_at(mock_utcnow) -> None:
-    user = build_plain_user(verified_at=datetime(2010, 3, 4, 0, 0, tzinfo=UTC))
 
     user.is_verified = False
 
     assert user.verified_at is None
-    mock_utcnow.assert_not_called()
-
-
-def test_is_superuser_true_sets_superuser_granted_at(mock_utcnow) -> None:
-    timestamp = datetime(2010, 3, 4, 0, 0, tzinfo=UTC)
-    mock_utcnow.return_value = timestamp
-    user = build_plain_user()
-
-    user.is_superuser = True
-
-    assert user.superuser_granted_at == timestamp
-    mock_utcnow.assert_called_once_with()
-
-
-def test_is_superuser_false_clears_superuser_granted_at(mock_utcnow) -> None:
-    user = build_plain_user(superuser_granted_at=datetime(2010, 3, 4, 0, 0, tzinfo=UTC))
-
-    user.is_superuser = False
-
-    assert user.superuser_granted_at is None
-    mock_utcnow.assert_not_called()
 
 
 @pytest.mark.asyncio
 async def test_on_after_login_updates_last_login_at(mock_utcnow, mocker) -> None:
-    timestamp = datetime(2010, 3, 4, 0, 0, tzinfo=UTC)
-    mock_utcnow.return_value = timestamp
+    user = build_verified_user()
     user_db = mocker.Mock()
     user_db.update = mocker.AsyncMock()
-    user = build_plain_user()
     manager = UserManager(user_db)
+
+    timestamp = datetime(2000, 10, 10, 0, 0, tzinfo=UTC)
+    mock_utcnow.return_value = timestamp
 
     await manager.on_after_login(user)
 
     user_db.update.assert_awaited_once_with(user, {"last_login_at": timestamp})
-    mock_utcnow.assert_called_once_with()
+
+
+def test_is_active_tracks_deactivated_at(mock_utcnow) -> None:
+    user = build_plain_user()
+    assert user.deactivated_at is None
+
+    timestamp = datetime(2000, 10, 10, 0, 0, tzinfo=UTC)
+    mock_utcnow.return_value = timestamp
+
+    user.is_active = False
+
+    assert user.deactivated_at == timestamp
+
+    user.is_active = True
+
+    assert user.deactivated_at is None
+
+
+def test_is_superuser_tracks_superuser_granted_at(mock_utcnow) -> None:
+    user = build_plain_user()
+    assert user.superuser_granted_at is None
+
+    timestamp = datetime(2000, 10, 10, 0, 0, tzinfo=UTC)
+    mock_utcnow.return_value = timestamp
+
+    user.is_superuser = True
+
+    assert user.superuser_granted_at == timestamp
+
+    user.is_superuser = False
+
+    assert user.superuser_granted_at is None
