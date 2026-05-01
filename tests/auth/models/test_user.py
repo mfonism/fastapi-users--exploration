@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 import pytest
 
 from explore.auth.models import UserManager
-from tests.factories import (
+from tests.factories.user import (
     build_plain_user,
     build_signed_up_user,
     build_verified_user,

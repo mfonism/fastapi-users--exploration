@@ -1,15 +1,13 @@
-from .factories import (
+from tests.factories.user import (
+    FIRST_LOGIN_AT,
+    SIGNED_UP_AT,
+    SUPERUSER_GRANTED_AT,
+    VERIFIED_AT,
     build_plain_user,
     build_signed_up_user,
     build_superuser,
     build_user,
     build_verified_user,
-)
-from .factories.user import (
-    FIRST_LOGIN_AT,
-    SIGNED_UP_AT,
-    SUPERUSER_GRANTED_AT,
-    VERIFIED_AT,
 )
 
 
