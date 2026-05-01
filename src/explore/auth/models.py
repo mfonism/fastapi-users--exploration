@@ -72,6 +72,9 @@ class User(Base):
 
     @is_active.setter
     def is_active(self, value: bool) -> None:
+        if value == self.is_active:
+            return
+
         self.deactivated_at = None if value else clock.utcnow()
 
     @property
@@ -80,6 +83,9 @@ class User(Base):
 
     @is_verified.setter
     def is_verified(self, value: bool) -> None:
+        if value == self.is_verified:
+            return
+
         self.verified_at = clock.utcnow() if value else None
 
     @property
@@ -88,6 +94,9 @@ class User(Base):
 
     @is_superuser.setter
     def is_superuser(self, value: bool) -> None:
+        if value == self.is_superuser:
+            return
+
         self.superuser_granted_at = clock.utcnow() if value else None
 
 

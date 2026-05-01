@@ -6,6 +6,7 @@ from explore.auth.models import UserManager
 from tests.factories.user import (
     build_plain_user,
     build_signed_up_user,
+    build_superuser,
     build_verified_user,
 )
 
@@ -20,6 +21,23 @@ def test_is_verified_tracks_verified_at(mock_utcnow) -> None:
     user.is_verified = True
 
     assert user.verified_at == timestamp
+
+    user.is_verified = False
+
+    assert user.verified_at is None
+
+
+def test_is_verified_true_is_noop_if_already_verified() -> None:
+    verified_at = datetime(2000, 10, 10, 0, 0, tzinfo=UTC)
+    user = build_verified_user(verified_at=verified_at)
+
+    user.is_verified = True
+
+    assert user.verified_at == verified_at
+
+
+def test_is_verified_false_is_noop_if_already_unverified() -> None:
+    user = build_signed_up_user()
 
     user.is_verified = False
 
@@ -57,6 +75,23 @@ def test_is_active_tracks_deactivated_at(mock_utcnow) -> None:
     assert user.deactivated_at is None
 
 
+def test_is_active_false_is_noop_if_already_deactivated() -> None:
+    deactivated_at = datetime(2000, 10, 10, 0, 0, tzinfo=UTC)
+    user = build_plain_user(deactivated_at=deactivated_at)
+
+    user.is_active = False
+
+    assert user.deactivated_at == deactivated_at
+
+
+def test_is_active_true_is_noop_if_already_active() -> None:
+    user = build_plain_user()
+
+    user.is_active = True
+
+    assert user.deactivated_at is None
+
+
 def test_is_superuser_tracks_superuser_granted_at(mock_utcnow) -> None:
     user = build_plain_user()
     assert user.superuser_granted_at is None
@@ -67,6 +102,23 @@ def test_is_superuser_tracks_superuser_granted_at(mock_utcnow) -> None:
     user.is_superuser = True
 
     assert user.superuser_granted_at == timestamp
+
+    user.is_superuser = False
+
+    assert user.superuser_granted_at is None
+
+
+def test_is_superuser_true_is_noop_if_already_superuser() -> None:
+    superuser_granted_at = datetime(2000, 10, 10, 0, 0, tzinfo=UTC)
+    user = build_superuser(superuser_granted_at=superuser_granted_at)
+
+    user.is_superuser = True
+
+    assert user.superuser_granted_at == superuser_granted_at
+
+
+def test_is_superuser_false_is_noop_if_not_superuser() -> None:
+    user = build_plain_user()
 
     user.is_superuser = False
 
