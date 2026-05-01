@@ -1,6 +1,7 @@
 import os
 
 import httpx
+import pytest
 import pytest_asyncio
 from sqlalchemy import event
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -68,3 +69,8 @@ async def client(session):
 
     finally:
         app.dependency_overrides.pop(get_async_session, None)
+
+
+@pytest.fixture
+def mock_utcnow(mocker):
+    return mocker.patch("explore.utils.clock.utcnow", autospec=True)

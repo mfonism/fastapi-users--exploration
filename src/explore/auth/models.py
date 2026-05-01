@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime
 
 from fastapi import Depends, Request, Response
 from fastapi_users import BaseUserManager, UUIDIDMixin
@@ -12,10 +12,7 @@ from sqlalchemy.schema import FetchedValue
 from ..db.base import Base
 from ..db.config import get_async_session
 from ..settings import settings
-
-
-def utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+from ..utils import clock
 
 
 class User(Base):
@@ -75,7 +72,7 @@ class User(Base):
 
     @is_active.setter
     def is_active(self, value: bool) -> None:
-        self.deactivated_at = None if value else utcnow()
+        self.deactivated_at = None if value else clock.utcnow()
 
     @property
     def is_verified(self) -> bool:
@@ -83,7 +80,7 @@ class User(Base):
 
     @is_verified.setter
     def is_verified(self, value: bool) -> None:
-        self.verified_at = utcnow() if value else None
+        self.verified_at = clock.utcnow() if value else None
 
     @property
     def is_superuser(self) -> bool:
@@ -91,7 +88,7 @@ class User(Base):
 
     @is_superuser.setter
     def is_superuser(self, value: bool) -> None:
-        self.superuser_granted_at = utcnow() if value else None
+        self.superuser_granted_at = clock.utcnow() if value else None
 
 
 async def get_user_db(session: AsyncSession = Depends(get_async_session)):
@@ -108,7 +105,7 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
         request: Request | None = None,
         response: Response | None = None,
     ) -> None:
-        await self.user_db.update(user, {"last_login_at": utcnow()})
+        await self.user_db.update(user, {"last_login_at": clock.utcnow()})
 
 
 async def get_user_manager(user_db=Depends(get_user_db)):
