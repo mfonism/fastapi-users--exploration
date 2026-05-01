@@ -8,7 +8,6 @@ from tests.factories.user import (
     build_plain_user,
     build_signed_up_user,
     build_superuser,
-    build_user,
     build_verified_user,
 )
 
@@ -42,10 +41,6 @@ def test_build_plain_user() -> None:
     assert user.verified_at == VERIFIED_AT
     assert user.last_login_at == FIRST_LOGIN_AT
     assert user.superuser_granted_at is None
-
-
-def test_build_user() -> None:
-    assert build_user is build_plain_user
 
 
 def test_build_superuser() -> None:

@@ -8,7 +8,6 @@ __all__ = [
     "build_plain_user",
     "build_signed_up_user",
     "build_superuser",
-    "build_user",
     "build_verified_user",
 ]
 
@@ -61,9 +60,6 @@ def build_verified_user(**overrides: object) -> User:
 
 def build_plain_user(**overrides: object) -> User:
     return _build_user(_LOGGED_IN_STATE, overrides)
-
-
-build_user = build_plain_user
 
 
 def build_superuser(**overrides: object) -> User:
