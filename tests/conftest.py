@@ -3,6 +3,8 @@ import os
 import httpx
 import pytest
 import pytest_asyncio
+from fastapi_users.db import SQLAlchemyUserDatabase
+from fastapi_users.password import Argon2Hasher, PasswordHash, PasswordHelper
 from sqlalchemy import event
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,6 +15,7 @@ from explore.env import AppEnv
 os.environ.setdefault("APP_ENV", AppEnv.TEST.value)
 
 from explore.app import app
+from explore.auth.models import User, UserManager, get_user_manager
 from explore.db.config import (
     create_engine,
     get_async_session,
@@ -51,12 +54,23 @@ async def session(engine):
             await transaction.rollback()
 
 
+@pytest.fixture
+def password_helper():
+    return PasswordHelper(
+        PasswordHash((Argon2Hasher(time_cost=1, memory_cost=8, parallelism=1),))
+    )
+
+
 @pytest_asyncio.fixture
-async def client(session):
+async def client(session, password_helper):
     async def override_get_async_session():
         yield session
 
+    async def override_get_user_manager():
+        yield UserManager(SQLAlchemyUserDatabase(session, User), password_helper)
+
     app.dependency_overrides[get_async_session] = override_get_async_session
+    app.dependency_overrides[get_user_manager] = override_get_user_manager
 
     try:
         transport = httpx.ASGITransport(app=app)
@@ -68,6 +82,7 @@ async def client(session):
             yield test_client
 
     finally:
+        app.dependency_overrides.pop(get_user_manager, None)
         app.dependency_overrides.pop(get_async_session, None)
 
 

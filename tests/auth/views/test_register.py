@@ -7,7 +7,7 @@ from explore.auth.models import User
 
 
 @pytest.mark.asyncio
-async def test_register_creates_user(client, session) -> None:
+async def test_register_creates_user(client, password_helper, session) -> None:
     terms_accepted_at = datetime(2000, 10, 10, 0, 0, tzinfo=UTC)
 
     response = await client.post(
@@ -35,6 +35,11 @@ async def test_register_creates_user(client, session) -> None:
     assert user.is_verified is False
     assert user.is_superuser is False
     assert user.last_login_at is None
+
+    password_verified, _ = password_helper.verify_and_update(
+        "strongpass123", user.hashed_password
+    )
+    assert password_verified is True
 
 
 @pytest.mark.asyncio
