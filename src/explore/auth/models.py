@@ -13,6 +13,7 @@ from ..db.base import Base
 from ..db.config import get_async_session
 from ..settings import settings
 from ..utils import clock
+from .notifications import send_verification_request
 
 
 class User(Base):
@@ -123,6 +124,18 @@ async def get_user_db(session: AsyncSession = Depends(get_async_session)):
 class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     reset_password_token_secret = settings.reset_password_token_secret
     verification_token_secret = settings.verification_token_secret
+
+    async def on_after_register(self, user: User, request: Request | None = None):
+        await self.request_verify(user, request)
+
+    async def on_after_request_verify(
+        self, user: User, token: str, request: Request | None = None
+    ):
+        await send_verification_request(
+            recipient_email=user.email,
+            recipient_name=user.full_name,
+            token=token,
+        )
 
     async def on_after_login(
         self,
