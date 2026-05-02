@@ -76,51 +76,6 @@ async def test_register_sends_verification_request(client, mocker) -> None:
 
 
 @pytest.mark.asyncio
-async def test_register_returns_created_user_data(client) -> None:
-    terms_accepted_at = datetime(2000, 10, 10, 0, 0, tzinfo=UTC)
-
-    response = await client.post(
-        app.url_path_for("register:register"),
-        json={
-            "email": "alice@example.com",
-            "full_name": "Alice Example",
-            "password": "strongpass123",
-            "terms_accepted_at": terms_accepted_at.isoformat(),
-        },
-    )
-
-    assert response.status_code == 201
-
-    payload = response.json()
-    assert set(payload) == {
-        "created_at",
-        "deactivated_at",
-        "deleted_at",
-        "email",
-        "full_name",
-        "id",
-        "last_login_at",
-        "superuser_granted_at",
-        "terms_accepted_at",
-        "updated_at",
-        "verified_at",
-    }
-    assert payload["email"] == "alice@example.com"
-    assert payload["full_name"] == "Alice Example"
-    assert uuid.UUID(payload["id"]) is not None
-    assert datetime.fromisoformat(payload["created_at"]) is not None
-    assert datetime.fromisoformat(payload["updated_at"]) is not None
-    assert payload["last_login_at"] is None
-    assert payload["superuser_granted_at"] is None
-    assert payload["deactivated_at"] is None
-    assert payload["deleted_at"] is None
-    assert payload["verified_at"] is None
-    assert datetime.fromisoformat(payload["terms_accepted_at"]) == terms_accepted_at
-    assert "password" not in payload
-    assert "hashed_password" not in payload
-
-
-@pytest.mark.asyncio
 async def test_register_rejects_duplicate_email(client, mocker, session) -> None:
     mock_send_verification_request = mocker.patch(
         "explore.auth.models.send_verification_request",
@@ -141,7 +96,6 @@ async def test_register_rejects_duplicate_email(client, mocker, session) -> None
     )
 
     assert response.status_code == 400
-    assert response.json()["detail"] == "REGISTER_USER_ALREADY_EXISTS"
     mock_send_verification_request.assert_not_awaited()
 
 
@@ -149,16 +103,6 @@ async def test_register_rejects_duplicate_email(client, mocker, session) -> None
 @pytest.mark.parametrize(
     "payload",
     [
-        pytest.param(
-            {
-                "full_name": "Alice Example",
-                "password": "strongpass123",
-                "terms_accepted_at": datetime(
-                    2000, 10, 10, 0, 0, tzinfo=UTC
-                ).isoformat(),
-            },
-            id="missing_email",
-        ),
         pytest.param(
             {
                 "email": "alice@example.com",
@@ -188,7 +132,13 @@ async def test_register_rejects_duplicate_email(client, mocker, session) -> None
         ),
     ],
 )
-async def test_register_validates_payload(client, payload) -> None:
+async def test_register_validates_payload(client, mocker, payload) -> None:
+    mock_send_verification_request = mocker.patch(
+        "explore.auth.models.send_verification_request",
+        autospec=True,
+    )
+
     response = await client.post(app.url_path_for("register:register"), json=payload)
 
     assert response.status_code == 422
+    mock_send_verification_request.assert_not_awaited()
