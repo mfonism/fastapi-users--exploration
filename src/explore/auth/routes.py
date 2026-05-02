@@ -5,7 +5,14 @@ from fastapi_users import FastAPIUsers
 
 from .backends.redis import backend as redis_backend
 from .models import User, get_user_manager
-from .schemas import RegisterLinkRead, UserCreate, UserRead, UserUpdate, VerifyLinkRead
+from .schemas import (
+    RegisterLinkRead,
+    RequestVerifyTokenLinkRead,
+    UserCreate,
+    UserRead,
+    UserUpdate,
+    VerifyLinkRead,
+)
 
 fastapi_users = FastAPIUsers[User, uuid.UUID](get_user_manager, [redis_backend])
 
@@ -44,6 +51,16 @@ router.include_router(
     prefix="/auth",
     tags=["auth"],
 )
+
+
+@router.get(
+    "/auth/request-verify-token",
+    response_model=RequestVerifyTokenLinkRead,
+    name="verify:request-token-link",
+    tags=["auth"],
+)
+async def request_verify_token_link():
+    return RequestVerifyTokenLinkRead()
 
 
 @router.get(

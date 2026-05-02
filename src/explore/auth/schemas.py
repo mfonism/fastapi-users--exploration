@@ -58,5 +58,9 @@ class RegisterLinkRead(BaseModel):
     pass
 
 
+class RequestVerifyTokenLinkRead(BaseModel):
+    pass
+
+
 class VerifyLinkRead(BaseModel):
     token: str

@@ -5,6 +5,14 @@ from tests.factories.user import build_signed_up_user
 
 
 @pytest.mark.asyncio
+async def test_request_verify_token_link_returns_empty_payload(client) -> None:
+    response = await client.get(app.url_path_for("verify:request-token-link"))
+
+    assert response.status_code == 200
+    assert response.json() == {}
+
+
+@pytest.mark.asyncio
 async def test_request_verify_token_sends_verification_request(
     client,
     mocker,
