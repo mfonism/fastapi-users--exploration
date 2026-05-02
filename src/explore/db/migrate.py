@@ -3,6 +3,7 @@ import asyncio
 import importlib
 import os
 import time
+from enum import StrEnum
 
 from alembic.config import Config
 
@@ -10,12 +11,15 @@ from alembic import command
 
 from ..env import AppEnv
 
-MigrationDirection = str
+
+class MigrationDirection(StrEnum):
+    UPGRADE = "upgrade"
+    DOWNGRADE = "downgrade"
 
 
 def parse_args(direction: MigrationDirection) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description=f"{direction.title()} configured databases with Alembic.",
+        description=f"{direction.value.title()} configured databases with Alembic.",
     )
     parser.add_argument(
         "--app-env",
@@ -36,16 +40,16 @@ def parse_args(direction: MigrationDirection) -> argparse.Namespace:
 
 
 def alembic_command(direction: MigrationDirection):
-    if direction == "upgrade":
+    if direction == MigrationDirection.UPGRADE:
         return command.upgrade
-    if direction == "downgrade":
+    if direction == MigrationDirection.DOWNGRADE:
         return command.downgrade
 
     raise ValueError(f"Unsupported migration direction: {direction}")
 
 
 def default_revision(direction: MigrationDirection) -> str:
-    return "head" if direction == "upgrade" else "-1"
+    return "head" if direction == MigrationDirection.UPGRADE else "-1"
 
 
 async def migrate_environment(
@@ -82,7 +86,7 @@ async def run_migrations(
 
         elapsed = await migrate_environment(app_env, direction, revision)
         print(
-            f"{app_env.value} database {direction}d to {revision} ✅ "
+            f"{app_env.value} database {direction.value}d to {revision} ✅ "
             f"(took {elapsed:.2f}s)"
         )
         seen.add(app_env)
@@ -100,8 +104,8 @@ def run(direction: MigrationDirection) -> None:
 
 
 def upgrade_main() -> None:
-    run("upgrade")
+    run(MigrationDirection.UPGRADE)
 
 
 def downgrade_main() -> None:
-    run("downgrade")
+    run(MigrationDirection.DOWNGRADE)
