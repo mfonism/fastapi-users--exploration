@@ -23,8 +23,8 @@ def parse_args(direction: MigrationDirection) -> argparse.Namespace:
         action="append",
         choices=[AppEnv.LOCAL.value, AppEnv.TEST.value],
         help=(
-            "Migrate only the selected environment. "
-            "Repeat to migrate multiple environments."
+            "Apply only to the selected environment. "
+            "Repeat to target multiple environments."
         ),
     )
     parser.add_argument(
@@ -88,7 +88,7 @@ async def run_migrations(
         seen.add(app_env)
 
 
-def main(direction: MigrationDirection = "upgrade") -> None:
+def run(direction: MigrationDirection) -> None:
     args = parse_args(direction)
     app_envs = (
         [AppEnv(env) for env in args.app_envs]
@@ -100,8 +100,8 @@ def main(direction: MigrationDirection = "upgrade") -> None:
 
 
 def upgrade_main() -> None:
-    main("upgrade")
+    run("upgrade")
 
 
 def downgrade_main() -> None:
-    main("downgrade")
+    run("downgrade")
