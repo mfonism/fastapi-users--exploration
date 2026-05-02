@@ -54,5 +54,9 @@ class UserUpdate(schemas.CreateUpdateDictModel):
         )
 
 
+class RegisterLinkRead(BaseModel):
+    pass
+
+
 class VerifyLinkRead(BaseModel):
     token: str

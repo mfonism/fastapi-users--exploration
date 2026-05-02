@@ -5,7 +5,7 @@ from fastapi_users import FastAPIUsers
 
 from .backends.redis import backend as redis_backend
 from .models import User, get_user_manager
-from .schemas import UserCreate, UserRead, UserUpdate, VerifyLinkRead
+from .schemas import RegisterLinkRead, UserCreate, UserRead, UserUpdate, VerifyLinkRead
 
 fastapi_users = FastAPIUsers[User, uuid.UUID](get_user_manager, [redis_backend])
 
@@ -22,6 +22,18 @@ router.include_router(
     prefix="/auth",
     tags=["auth"],
 )
+
+
+@router.get(
+    "/auth/register",
+    response_model=RegisterLinkRead,
+    name="register:register-link",
+    tags=["auth"],
+)
+async def register_link():
+    return RegisterLinkRead()
+
+
 router.include_router(
     fastapi_users.get_reset_password_router(),
     prefix="/auth",

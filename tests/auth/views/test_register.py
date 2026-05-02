@@ -9,6 +9,14 @@ from tests.factories.user import build_signed_up_user
 
 
 @pytest.mark.asyncio
+async def test_register_link_returns_empty_payload(client) -> None:
+    response = await client.get(app.url_path_for("register:register-link"))
+
+    assert response.status_code == 200
+    assert response.json() == {}
+
+
+@pytest.mark.asyncio
 async def test_register_creates_user(client, password_helper, session) -> None:
     terms_accepted_at = datetime(2000, 10, 10, 0, 0, tzinfo=UTC)
 
