@@ -200,6 +200,8 @@ Migration-only command:
 ```bash
 uv run db-migrate
 uv run db-migrate --app-env test
+uv run db-upgrade --app-env test --revision head
+uv run db-downgrade --app-env test --revision -1
 ```
 
 ## API quick checks
