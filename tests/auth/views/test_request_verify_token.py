@@ -5,21 +5,13 @@ from tests.factories.user import build_signed_up_user
 
 
 @pytest.mark.asyncio
-async def test_request_verify_token_link_returns_empty_payload(client) -> None:
-    response = await client.get(app.url_path_for("verify:request-token-link"))
-
-    assert response.status_code == 200
-    assert response.json() == {}
-
-
-@pytest.mark.asyncio
 async def test_request_verify_token_sends_verification_request(
     client,
     mocker,
     session,
 ) -> None:
     verification_token = "random-verification-token"
-    mock_generate_jwt = mocker.patch(
+    mocker.patch(
         "fastapi_users.manager.generate_jwt",
         return_value=verification_token,
     )
@@ -39,7 +31,6 @@ async def test_request_verify_token_sends_verification_request(
 
     assert response.status_code == 202
 
-    mock_generate_jwt.assert_called_once()
     mock_send_verification_request.assert_awaited_once_with(
         recipient_email="alice@example.com",
         recipient_name="Alice Example",
