@@ -13,7 +13,7 @@ from ..db.base import Base
 from ..db.config import get_async_session
 from ..settings import settings
 from ..utils import clock
-from .notifications import send_verification_request
+from .notifications import send_password_reset_request, send_verification_request
 
 
 class User(Base):
@@ -132,6 +132,15 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
         self, user: User, token: str, request: Request | None = None
     ):
         await send_verification_request(
+            recipient_email=user.email,
+            recipient_name=user.full_name,
+            token=token,
+        )
+
+    async def on_after_forgot_password(
+        self, user: User, token: str, request: Request | None = None
+    ):
+        await send_password_reset_request(
             recipient_email=user.email,
             recipient_name=user.full_name,
             token=token,
