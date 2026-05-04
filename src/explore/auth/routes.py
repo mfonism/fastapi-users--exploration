@@ -13,7 +13,7 @@ fastapi_users = FastAPIUsers[User, uuid.UUID](get_user_manager, [redis_backend])
 router = APIRouter()
 
 router.include_router(
-    fastapi_users.get_auth_router(redis_backend),
+    fastapi_users.get_auth_router(redis_backend, requires_verification=True),
     prefix="/auth",
     tags=["auth"],
 )
