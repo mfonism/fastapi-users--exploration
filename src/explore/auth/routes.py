@@ -1,14 +1,9 @@
-import uuid
-
 from fastapi import APIRouter, Depends
-from fastapi_users import FastAPIUsers
 
 from .backends.redis import backend as redis_backend
-from .models import User, get_user_manager
+from .dependencies import current_user, fastapi_users
+from .models import User
 from .schemas import UserCreate, UserRead, UserUpdate
-
-fastapi_users = FastAPIUsers[User, uuid.UUID](get_user_manager, [redis_backend])
-
 
 router = APIRouter()
 
@@ -37,8 +32,6 @@ router.include_router(
     prefix="/users",
     tags=["users"],
 )
-
-current_user = fastapi_users.current_user(active=True, verified=True)
 
 
 @router.get("/whoami", response_model=UserRead, tags=["users"])
