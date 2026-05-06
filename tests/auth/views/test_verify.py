@@ -34,3 +34,31 @@ async def test_verify_marks_user_verified(client, mock_utcnow, session) -> None:
     assert response.status_code == 200
     await session.refresh(user)
     assert user.verified_at == verified_at
+
+
+@pytest.mark.asyncio
+async def test_verify_rejects_deleted_user(client, session) -> None:
+    deleted_at = datetime(2000, 10, 10, 0, 0, tzinfo=UTC)
+    user = build_signed_up_user(deleted_at=deleted_at)
+    session.add(user)
+    await session.flush()
+
+    verification_token = generate_jwt(
+        {
+            "sub": str(user.id),
+            "email": user.email,
+            "aud": UserManager.verification_token_audience,
+        },
+        UserManager.verification_token_secret,
+        UserManager.verification_token_lifetime_seconds,
+    )
+
+    response = await client.post(
+        app.url_path_for("verify:verify"),
+        json={"token": verification_token},
+    )
+
+    assert response.status_code == 400
+    await session.refresh(user)
+    assert user.verified_at is None
+    assert user.deleted_at == deleted_at

@@ -1,7 +1,9 @@
 import uuid
 from datetime import datetime
+from typing import Any
 
 from fastapi import Depends, Request, Response
+from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_users import BaseUserManager, UUIDIDMixin
 from fastapi_users.db import SQLAlchemyUserDatabase
 from sqlalchemy import DateTime, String, func, text
@@ -13,6 +15,7 @@ from ..db.base import Base
 from ..db.config import get_async_session
 from ..settings import settings
 from ..utils import clock
+from .exceptions import UserDeleted
 from .notifications import send_password_reset_request, send_verification_request
 
 
@@ -124,6 +127,30 @@ async def get_user_db(session: AsyncSession = Depends(get_async_session)):
 class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     reset_password_token_secret = settings.reset_password_token_secret
     verification_token_secret = settings.verification_token_secret
+
+    def _raise_if_deleted(self, user: User) -> None:
+        if user.is_deleted:
+            raise UserDeleted()
+
+    async def authenticate(self, credentials: OAuth2PasswordRequestForm):
+        user = await super().authenticate(credentials)
+
+        if user is not None:
+            self._raise_if_deleted(user)
+
+        return user
+
+    async def request_verify(self, user: User, request: Request | None = None) -> None:
+        self._raise_if_deleted(user)
+        await super().request_verify(user, request)
+
+    async def forgot_password(self, user: User, request: Request | None = None) -> None:
+        self._raise_if_deleted(user)
+        await super().forgot_password(user, request)
+
+    async def _update(self, user: User, update_dict: dict[str, Any]) -> User:
+        self._raise_if_deleted(user)
+        return await super()._update(user, update_dict)
 
     async def on_after_register(self, user: User, request: Request | None = None):
         await self.request_verify(user, request)
