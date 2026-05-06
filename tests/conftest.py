@@ -15,6 +15,7 @@ from explore.env import AppEnv
 os.environ.setdefault("APP_ENV", AppEnv.TEST.value)
 
 from explore.app import app
+from explore.auth.backends.redis import get_strategy
 from explore.auth.models import User, UserManager, get_user_manager
 from explore.db.config import (
     create_engine,
@@ -89,3 +90,14 @@ async def client(session, password_helper):
 @pytest.fixture
 def mock_utcnow(mocker):
     return mocker.patch("explore.utils.clock.utcnow", autospec=True)
+
+
+@pytest.fixture
+def authenticate_as():
+    async def _authenticate_as(client, user) -> str:
+        strategy = get_strategy()
+        token = await strategy.write_token(user)
+        client.headers["Authorization"] = f"Bearer {token}"
+        return token
+
+    return _authenticate_as

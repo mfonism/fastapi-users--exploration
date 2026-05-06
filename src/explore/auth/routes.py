@@ -38,9 +38,9 @@ router.include_router(
     tags=["users"],
 )
 
-current_active_user = fastapi_users.current_user(active=True)
+current_user = fastapi_users.current_user(active=True, verified=True)
 
 
 @router.get("/whoami", response_model=UserRead, tags=["users"])
-async def whoami(user: User = Depends(current_active_user)):
+async def whoami(user: User = Depends(current_user)):
     return user
