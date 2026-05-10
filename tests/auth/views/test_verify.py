@@ -37,6 +37,67 @@ async def test_verify_marks_user_verified(client, mock_utcnow, session) -> None:
 
 
 @pytest.mark.asyncio
+async def test_verify_rejects_reused_token(client, mock_utcnow, session) -> None:
+    user = build_signed_up_user()
+    session.add(user)
+    await session.flush()
+
+    verification_token = generate_jwt(
+        {
+            "sub": str(user.id),
+            "email": user.email,
+            "aud": UserManager.verification_token_audience,
+        },
+        UserManager.verification_token_secret,
+        UserManager.verification_token_lifetime_seconds,
+    )
+    verified_at = datetime(2000, 10, 10, 0, 0, tzinfo=UTC)
+    mock_utcnow.return_value = verified_at
+
+    first_response = await client.post(
+        app.url_path_for("verify:verify"),
+        json={"token": verification_token},
+    )
+    assert first_response.status_code == 200
+
+    second_response = await client.post(
+        app.url_path_for("verify:verify"),
+        json={"token": verification_token},
+    )
+    assert second_response.status_code == 400
+
+    await session.refresh(user)
+    assert user.verified_at == verified_at
+
+
+@pytest.mark.asyncio
+async def test_verify_rejects_expired_token(client, session) -> None:
+    user = build_signed_up_user()
+    session.add(user)
+    await session.flush()
+
+    # Generate JWT with an `exp` claim in the past
+    expired_verification_token = generate_jwt(
+        {
+            "sub": str(user.id),
+            "email": user.email,
+            "aud": UserManager.verification_token_audience,
+        },
+        UserManager.verification_token_secret,
+        lifetime_seconds=-1,
+    )
+
+    response = await client.post(
+        app.url_path_for("verify:verify"),
+        json={"token": expired_verification_token},
+    )
+
+    assert response.status_code == 400
+    await session.refresh(user)
+    assert user.verified_at is None
+
+
+@pytest.mark.asyncio
 async def test_verify_rejects_deleted_user(client, session) -> None:
     deleted_at = datetime(2000, 10, 10, 0, 0, tzinfo=UTC)
     user = build_signed_up_user(deleted_at=deleted_at)
