@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 
 from fastapi_users import schemas
-from pydantic import ConfigDict, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr
 
 
 class UserRead(schemas.CreateUpdateDictModel):
@@ -26,6 +26,11 @@ class UserCreate(schemas.CreateUpdateDictModel):
     full_name: str
     password: str
     terms_accepted_at: datetime
+
+
+class PasswordChange(BaseModel):
+    current_password: str
+    new_password: str
 
 
 class UserUpdate(schemas.CreateUpdateDictModel):
