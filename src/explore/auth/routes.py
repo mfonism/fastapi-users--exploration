@@ -54,6 +54,20 @@ async def change_password(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
+@router.post(
+    "/auth/deactivate",
+    status_code=status.HTTP_204_NO_CONTENT,
+    name="auth:deactivate",
+    tags=["auth"],
+)
+async def deactivate(
+    user: User = Depends(current_user),
+    user_manager: UserManager = Depends(get_user_manager),
+):
+    await user_manager._update(user, {"is_active": False})
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
 router.include_router(
     fastapi_users.get_users_router(UserRead, UserUpdate),
     prefix="/users",
