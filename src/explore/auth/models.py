@@ -2,10 +2,12 @@ import uuid
 from datetime import datetime
 from typing import Any
 
+import jwt
 from fastapi import Depends, Request, Response
 from fastapi.security import OAuth2PasswordRequestForm
-from fastapi_users import BaseUserManager, UUIDIDMixin
+from fastapi_users import BaseUserManager, UUIDIDMixin, exceptions
 from fastapi_users.db import SQLAlchemyUserDatabase
+from fastapi_users.jwt import decode_jwt
 from sqlalchemy import DateTime, String, func, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column
@@ -147,6 +149,35 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     async def forgot_password(self, user: User, request: Request | None = None) -> None:
         self._raise_if_deleted(user)
         await super().forgot_password(user, request)
+
+    async def verify(self, token: str, request: Request | None = None) -> User:
+        try:
+            return await super().verify(token, request)
+        except exceptions.UserAlreadyVerified:
+            return await self._get_already_verified_user(token)
+
+    async def _get_already_verified_user(self, token: str) -> User:
+        try:
+            data = decode_jwt(
+                token,
+                self.verification_token_secret,
+                [self.verification_token_audience],
+            )
+        except jwt.PyJWTError:
+            raise exceptions.InvalidVerifyToken() from None
+
+        try:
+            email = data["email"]
+        except KeyError:
+            raise exceptions.InvalidVerifyToken() from None
+
+        try:
+            user = await self.get_by_email(email)
+        except exceptions.UserNotExists:
+            raise exceptions.InvalidVerifyToken() from None
+
+        self._raise_if_deleted(user)
+        return user
 
     async def _update(self, user: User, update_dict: dict[str, Any]) -> User:
         self._raise_if_deleted(user)

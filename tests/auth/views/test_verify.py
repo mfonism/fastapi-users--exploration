@@ -37,7 +37,7 @@ async def test_verify_marks_user_verified(client, mock_utcnow, session) -> None:
 
 
 @pytest.mark.asyncio
-async def test_verify_rejects_reused_token(client, mock_utcnow, session) -> None:
+async def test_verify_is_idempotent(client, mock_utcnow, session) -> None:
     user = build_signed_up_user()
     session.add(user)
     await session.flush()
@@ -64,7 +64,7 @@ async def test_verify_rejects_reused_token(client, mock_utcnow, session) -> None
         app.url_path_for("verify:verify"),
         json={"token": verification_token},
     )
-    assert second_response.status_code == 400
+    assert second_response.status_code == 200
 
     await session.refresh(user)
     assert user.verified_at == verified_at
