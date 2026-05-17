@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 
 from fastapi_users import schemas
-from pydantic import BaseModel, ConfigDict, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class UserRead(schemas.CreateUpdateDictModel):
@@ -33,13 +33,13 @@ class CurrentUserRead(schemas.CreateUpdateDictModel):
 class UserCreate(schemas.CreateUpdateDictModel):
     email: EmailStr
     full_name: str
-    password: str
+    password: str = Field(json_schema_extra={"writeOnly": True})
     terms_accepted_at: datetime
 
 
 class PasswordChange(BaseModel):
-    current_password: str
-    new_password: str
+    current_password: str = Field(json_schema_extra={"writeOnly": True})
+    new_password: str = Field(json_schema_extra={"writeOnly": True})
 
 
 class CurrentUserUpdate(schemas.CreateUpdateDictModel):
