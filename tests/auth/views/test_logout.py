@@ -12,7 +12,7 @@ async def test_logout_revokes_access_token(client, authenticate_as, session) -> 
 
     await authenticate_as(client, user)
 
-    protected_endpoint = app.url_path_for("whoami")
+    protected_endpoint = app.url_path_for("users:current_user")
 
     # assert that authenticated user can access protected endpoint
     authenticated_response = await client.get(protected_endpoint)

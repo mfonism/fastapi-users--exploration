@@ -27,5 +27,5 @@ async def test_deactivate_marks_current_user_inactive(
     await session.refresh(user)
     assert user.deactivated_at == deactivated_at
 
-    protected_response = await client.get(app.url_path_for("whoami"))
+    protected_response = await client.get(app.url_path_for("users:current_user"))
     assert protected_response.status_code == 401

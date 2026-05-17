@@ -33,27 +33,11 @@ class PasswordChange(BaseModel):
     new_password: str
 
 
-class UserUpdate(schemas.CreateUpdateDictModel):
-    password: str | None = None
+class CurrentUserUpdate(schemas.CreateUpdateDictModel):
     email: EmailStr | None = None
     full_name: str | None = None
-    superuser_granted_at: datetime | None = None
-    deactivated_at: datetime | None = None
-    deleted_at: datetime | None = None
-    verified_at: datetime | None = None
+
+    model_config = ConfigDict(extra="forbid")
 
     def create_update_dict(self):
-        # Keep regular users from mutating privileged/account-state fields.
-        return self.model_dump(
-            exclude_unset=True,
-            exclude={
-                "id",
-                "created_at",
-                "updated_at",
-                "last_login_at",
-                "superuser_granted_at",
-                "deactivated_at",
-                "deleted_at",
-                "verified_at",
-            },
-        )
+        return self.model_dump(exclude_unset=True)

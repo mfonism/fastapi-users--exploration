@@ -11,6 +11,10 @@ current_active_verified_user = fastapi_users.current_user(
     active=True,
     verified=True,
 )
+current_active_verified_user_token = fastapi_users.authenticator.current_user_token(
+    active=True,
+    verified=True,
+)
 
 
 async def current_user(
@@ -20,3 +24,13 @@ async def current_user(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
     return user
+
+
+async def current_user_token(
+    user_token: tuple[User, str] = Depends(current_active_verified_user_token),
+) -> tuple[User, str]:
+    user, _ = user_token
+    if user.is_deleted:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+
+    return user_token

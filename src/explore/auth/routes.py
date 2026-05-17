@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 
 from .backends.redis import backend as redis_backend
-from .dependencies import current_user, fastapi_users
+from .dependencies import current_user, current_user_token, fastapi_users
 from .models import User, UserManager, get_user_manager
-from .schemas import PasswordChange, UserCreate, UserRead, UserUpdate
+from .schemas import CurrentUserUpdate, PasswordChange, UserCreate, UserRead
 
 router = APIRouter()
 
@@ -68,13 +68,41 @@ async def deactivate(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-router.include_router(
-    fastapi_users.get_users_router(UserRead, UserUpdate),
-    prefix="/users",
+@router.get(
+    "/users/me",
+    response_model=UserRead,
+    name="users:current_user",
     tags=["users"],
 )
-
-
-@router.get("/whoami", response_model=UserRead, tags=["users"])
-async def whoami(user: User = Depends(current_user)):
+async def get_current_user(user: User = Depends(current_user)):
     return user
+
+
+@router.patch(
+    "/users/me",
+    response_model=UserRead,
+    name="users:patch_current_user",
+    tags=["users"],
+)
+async def update_current_user(
+    user_update: CurrentUserUpdate,
+    user: User = Depends(current_user),
+    user_manager: UserManager = Depends(get_user_manager),
+):
+    return await user_manager._update(user, user_update.create_update_dict())
+
+
+@router.delete(
+    "/users/me",
+    status_code=status.HTTP_204_NO_CONTENT,
+    name="users:delete_current_user",
+    tags=["users"],
+)
+async def delete_current_user(
+    user_token: tuple[User, str] = Depends(current_user_token),
+    user_manager: UserManager = Depends(get_user_manager),
+    strategy=Depends(redis_backend.get_strategy),
+):
+    user, token = user_token
+    await user_manager._update(user, {"is_deleted": True})
+    return await redis_backend.logout(strategy, user, token)
