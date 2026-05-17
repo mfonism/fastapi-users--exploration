@@ -8,7 +8,6 @@ from .schemas import (
     CurrentUserUpdate,
     PasswordChange,
     UserCreate,
-    UserRead,
 )
 
 router = APIRouter()
@@ -19,7 +18,7 @@ router.include_router(
     tags=["auth"],
 )
 router.include_router(
-    fastapi_users.get_register_router(UserRead, UserCreate),
+    fastapi_users.get_register_router(CurrentUserRead, UserCreate),
     prefix="/auth",
     tags=["auth"],
 )
@@ -29,7 +28,7 @@ router.include_router(
     tags=["auth"],
 )
 router.include_router(
-    fastapi_users.get_verify_router(UserRead),
+    fastapi_users.get_verify_router(CurrentUserRead),
     prefix="/auth",
     tags=["auth"],
 )

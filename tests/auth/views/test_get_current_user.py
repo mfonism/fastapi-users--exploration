@@ -1,17 +1,8 @@
 import pytest
 
 from explore.app import app
+from tests.auth.views.assertions import assert_internal_user_fields_hidden
 from tests.factories.user import build_verified_user
-
-INTERNAL_USER_FIELDS = {
-    "deactivated_at",
-    "deleted_at",
-    "last_login_at",
-    "superuser_granted_at",
-    "terms_accepted_at",
-    "updated_at",
-    "verified_at",
-}
 
 
 @pytest.mark.asyncio
@@ -37,4 +28,4 @@ async def test_get_current_user_returns_authenticated_user(
     assert response.status_code == 200
     payload = response.json()
     assert payload["email"] == "alice@example.com"
-    assert not INTERNAL_USER_FIELDS & payload.keys()
+    assert_internal_user_fields_hidden(payload)

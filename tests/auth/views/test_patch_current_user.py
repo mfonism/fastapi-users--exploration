@@ -3,17 +3,8 @@ from datetime import UTC, datetime
 import pytest
 
 from explore.app import app
+from tests.auth.views.assertions import assert_internal_user_fields_hidden
 from tests.factories.user import build_verified_user
-
-INTERNAL_USER_FIELDS = {
-    "deactivated_at",
-    "deleted_at",
-    "last_login_at",
-    "superuser_granted_at",
-    "terms_accepted_at",
-    "updated_at",
-    "verified_at",
-}
 
 
 @pytest.mark.asyncio
@@ -38,7 +29,7 @@ async def test_patch_current_user_updates_full_name(
     payload = response.json()
     assert payload["email"] == "alice@example.com"
     assert payload["full_name"] == "Alice Updated"
-    assert not INTERNAL_USER_FIELDS & payload.keys()
+    assert_internal_user_fields_hidden(payload)
 
     await session.refresh(user)
     assert user.email == "alice@example.com"

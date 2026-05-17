@@ -5,6 +5,7 @@ import pytest
 
 from explore.app import app
 from explore.auth.models import User
+from tests.auth.views.assertions import assert_internal_user_fields_hidden
 from tests.factories.user import build_signed_up_user
 
 
@@ -25,6 +26,10 @@ async def test_register_creates_user(client, password_helper, session) -> None:
     assert response.status_code == 201
 
     payload = response.json()
+    assert payload["email"] == "alice@example.com"
+    assert payload["full_name"] == "Alice Example"
+    assert_internal_user_fields_hidden(payload)
+
     user_id = uuid.UUID(payload["id"])
     user = await session.get(User, user_id)
 

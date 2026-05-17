@@ -5,6 +5,7 @@ from fastapi_users.jwt import generate_jwt
 
 from explore.app import app
 from explore.auth.models import UserManager
+from tests.auth.views.assertions import assert_internal_user_fields_hidden
 from tests.factories.user import build_signed_up_user
 
 
@@ -32,6 +33,10 @@ async def test_verify_marks_user_verified(client, mock_utcnow, session) -> None:
     )
 
     assert response.status_code == 200
+    payload = response.json()
+    assert payload["email"] == user.email
+    assert_internal_user_fields_hidden(payload)
+
     await session.refresh(user)
     assert user.verified_at == verified_at
 
