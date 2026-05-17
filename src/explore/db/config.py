@@ -26,7 +26,7 @@ def get_engine():
 
 
 def create_engine():
-    return create_async_engine(settings.core_db_url, echo=settings.debug)
+    return create_async_engine(settings.core_db_url, echo=settings.db_echo)
 
 
 @lru_cache

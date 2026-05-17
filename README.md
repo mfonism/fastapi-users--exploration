@@ -117,6 +117,12 @@ Notes:
 - Before running tests for the first time, run `uv run db-bootstrap`.
 - To prepare only the test DB from scratch, run `uv run db-bootstrap --app-env test`.
 - To apply new schema changes to an existing test DB, run `uv run db-upgrade --app-env test`.
+- SQLAlchemy query echo is off by default so failed tests stay readable.
+  To debug database traffic for a test run, use:
+
+```bash
+DB_ECHO=true uv run pytest
+```
 
 ## Configuration
 

@@ -13,6 +13,7 @@ BASE_DIR = Path(__file__).parent.parent.parent.resolve()
 class Settings(BaseSettings):
     app_env: AppEnv = AppEnv.LOCAL
     debug: bool | None = None
+    db_echo: bool = False
 
     db_driver: str = "postgresql+asyncpg"
     db_host: str = "localhost"
@@ -38,9 +39,9 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    @field_validator("debug", mode="before")
+    @field_validator("debug", "db_echo", mode="before")
     @classmethod
-    def parse_debug_value(cls, value: object) -> bool | None:
+    def parse_bool_value(cls, value: object) -> bool | None:
         if value is None:
             return None
 
@@ -56,7 +57,7 @@ class Settings(BaseSettings):
             if normalized in {"0", "false", "f", "no", "n", "off", "release"}:
                 return False
 
-        raise ValueError("DEBUG must be a boolean-like value")
+        raise ValueError("Value must be boolean-like")
 
     @model_validator(mode="after")
     def finalize(self) -> "Settings":
