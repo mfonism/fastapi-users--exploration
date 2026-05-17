@@ -19,7 +19,6 @@ dependencies = [
 ]
 
 [project.scripts]
-explore = "explore:main"
 db-bootstrap = "explore.db.bootstrap:main"
 db-upgrade = "explore.db.migrate:upgrade_main"
 db-downgrade = "explore.db.migrate:downgrade_main"
