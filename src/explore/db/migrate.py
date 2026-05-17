@@ -9,6 +9,7 @@ from alembic.config import Config
 
 from alembic import command
 
+from .. import console
 from ..env import AppEnv
 
 
@@ -85,7 +86,7 @@ async def run_migrations(
             continue
 
         elapsed = await migrate_environment(app_env, direction, revision)
-        print(
+        console.write_line(
             f"{app_env.value} database {direction.value}d to {revision} ✅ "
             f"(took {elapsed:.2f}s)"
         )

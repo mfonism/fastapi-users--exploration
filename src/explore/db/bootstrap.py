@@ -8,6 +8,7 @@ from alembic.config import Config
 
 from alembic import command
 
+from .. import console
 from ..env import AppEnv
 
 
@@ -55,7 +56,7 @@ async def run_bootstrap(app_envs: list[AppEnv]) -> None:
             continue
 
         elapsed = await bootstrap_environment(app_env)
-        print(
+        console.write_line(
             f"{app_env.value} database is ready and migrated ✅ (took {elapsed:.2f}s)"
         )
         seen.add(app_env)
