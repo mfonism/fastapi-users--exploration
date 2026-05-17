@@ -5,9 +5,19 @@ import pytest
 from explore.app import app
 from tests.factories.user import build_verified_user
 
+INTERNAL_USER_FIELDS = {
+    "deactivated_at",
+    "deleted_at",
+    "last_login_at",
+    "superuser_granted_at",
+    "terms_accepted_at",
+    "updated_at",
+    "verified_at",
+}
+
 
 @pytest.mark.asyncio
-async def test_patch_current_user_updates_profile(
+async def test_patch_current_user_updates_full_name(
     client,
     authenticate_as,
     session,
@@ -20,14 +30,18 @@ async def test_patch_current_user_updates_profile(
     response = await client.patch(
         app.url_path_for("users:patch_current_user"),
         json={
-            "email": "alice.updated@example.com",
             "full_name": "Alice Updated",
         },
     )
 
     assert response.status_code == 200
+    payload = response.json()
+    assert payload["email"] == "alice@example.com"
+    assert payload["full_name"] == "Alice Updated"
+    assert not INTERNAL_USER_FIELDS & payload.keys()
+
     await session.refresh(user)
-    assert user.email == "alice.updated@example.com"
+    assert user.email == "alice@example.com"
     assert user.full_name == "Alice Updated"
 
 
@@ -35,6 +49,7 @@ async def test_patch_current_user_updates_profile(
 @pytest.mark.parametrize(
     "payload",
     [
+        pytest.param({"email": "alice.updated@example.com"}, id="email"),
         pytest.param({"password": "newstrongpass123"}, id="password"),
         pytest.param(
             {"verified_at": datetime(2000, 10, 10, 0, 0, tzinfo=UTC).isoformat()},
@@ -57,7 +72,7 @@ async def test_patch_current_user_updates_profile(
                     0,
                     0,
                     tzinfo=UTC,
-                ).isoformat(),
+                ).isoformat()
             },
             id="superuser_granted_at",
         ),

@@ -3,7 +3,13 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 from .backends.redis import backend as redis_backend
 from .dependencies import current_user, current_user_token, fastapi_users
 from .models import User, UserManager, get_user_manager
-from .schemas import CurrentUserUpdate, PasswordChange, UserCreate, UserRead
+from .schemas import (
+    CurrentUserRead,
+    CurrentUserUpdate,
+    PasswordChange,
+    UserCreate,
+    UserRead,
+)
 
 router = APIRouter()
 
@@ -70,7 +76,7 @@ async def deactivate(
 
 @router.get(
     "/users/me",
-    response_model=UserRead,
+    response_model=CurrentUserRead,
     name="users:current_user",
     tags=["users"],
 )
@@ -80,7 +86,7 @@ async def get_current_user(user: User = Depends(current_user)):
 
 @router.patch(
     "/users/me",
-    response_model=UserRead,
+    response_model=CurrentUserRead,
     name="users:patch_current_user",
     tags=["users"],
 )

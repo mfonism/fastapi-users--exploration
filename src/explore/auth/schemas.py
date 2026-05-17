@@ -21,6 +21,15 @@ class UserRead(schemas.CreateUpdateDictModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class CurrentUserRead(schemas.CreateUpdateDictModel):
+    id: uuid.UUID
+    email: EmailStr
+    full_name: str
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class UserCreate(schemas.CreateUpdateDictModel):
     email: EmailStr
     full_name: str
@@ -34,7 +43,6 @@ class PasswordChange(BaseModel):
 
 
 class CurrentUserUpdate(schemas.CreateUpdateDictModel):
-    email: EmailStr | None = None
     full_name: str | None = None
 
     model_config = ConfigDict(extra="forbid")
