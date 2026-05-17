@@ -42,5 +42,5 @@ line-length = 88
 target-version = "py314"
 
 [tool.ruff.lint]
-select = ["E", "F", "I"]
+select = ["E", "F", "I", "T100"]
 fixable = ["E", "F", "I"]
