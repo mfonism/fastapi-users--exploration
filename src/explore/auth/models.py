@@ -1,3 +1,5 @@
+import hashlib
+import secrets
 import uuid
 from datetime import datetime
 from typing import Any
@@ -8,7 +10,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_users import BaseUserManager, UUIDIDMixin, exceptions
 from fastapi_users.db import SQLAlchemyUserDatabase
 from fastapi_users.jwt import decode_jwt
-from sqlalchemy import DateTime, String, func, text
+from sqlalchemy import DateTime, ForeignKey, String, func, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.schema import FetchedValue
@@ -19,6 +21,16 @@ from ..settings import settings
 from ..utils import clock
 from .exceptions import UserDeleted
 from .notifications import send_password_reset_request, send_verification_request
+
+EMAIL_CHANGE_TOKEN_BYTES = 32
+
+
+def generate_email_change_token() -> str:
+    return secrets.token_urlsafe(EMAIL_CHANGE_TOKEN_BYTES)
+
+
+def hash_email_change_token(token: str) -> str:
+    return hashlib.sha256(token.encode()).hexdigest()
 
 
 class User(Base):
@@ -120,6 +132,71 @@ class User(Base):
             return
 
         self.superuser_granted_at = clock.utcnow() if value else None
+
+
+class UserEmailChange(Base):
+    __tablename__ = "user_email_change"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        primary_key=True,
+        server_default=text("uuidv7()"),
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("user.id", ondelete="CASCADE"),
+        index=True,
+        nullable=False,
+    )
+    old_email: Mapped[str] = mapped_column(String(length=320), nullable=False)
+    new_email: Mapped[str] = mapped_column(String(length=320), nullable=False)
+    token_hash: Mapped[str] = mapped_column(
+        String(length=64),
+        unique=True,
+        index=True,
+        nullable=False,
+    )
+    expires_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+    )
+    confirmed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+    cancelled_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+
+    def is_usable(self) -> bool:
+        return (
+            self.confirmed_at is None
+            and self.cancelled_at is None
+            and self.expires_at > clock.utcnow()
+        )
+
+    def confirm(self) -> bool:
+        confirmed_at = clock.utcnow()
+        if (
+            self.confirmed_at is not None
+            or self.cancelled_at is not None
+            or self.expires_at <= confirmed_at
+        ):
+            return False
+
+        self.confirmed_at = confirmed_at
+        return True
+
+    def cancel(self) -> bool:
+        if self.cancelled_at is not None or self.confirmed_at is not None:
+            return False
+
+        self.cancelled_at = clock.utcnow()
+        return True
 
 
 async def get_user_db(session: AsyncSession = Depends(get_async_session)):
