@@ -6,7 +6,7 @@ import pytest_asyncio
 from fastapi_users.db import SQLAlchemyUserDatabase
 from fastapi_users.password import Argon2Hasher, PasswordHash, PasswordHelper
 from sqlalchemy import event
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 # Set APP_ENV before importing project modules to ensure
 # the `settings` object is initialized with the correct APP_ENV
@@ -53,6 +53,19 @@ async def session(engine):
         finally:
             await session.close()
             await transaction.rollback()
+
+
+@pytest.fixture
+def session_factory(engine):
+    # Escape hatch fixture for tests that require truly independent database
+    # transactions.
+    #
+    # Prefer the transactional `session` fixture for nearly all tests. Using
+    # this fixture bypasses shared test transaction isolation and can leak
+    # committed state unless the test cleans up after itself.
+    #
+    # Intended primarily for concurrency/race-condition tests.
+    return async_sessionmaker(engine, expire_on_commit=False)
 
 
 @pytest.fixture

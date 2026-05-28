@@ -1,9 +1,10 @@
 from datetime import UTC, datetime, timedelta
 
 import pytest
+from sqlalchemy import delete
 
 from explore.app import app
-from explore.auth.models import UserEmailChange, hash_email_change_token
+from explore.auth.models import User, UserEmailChange, hash_email_change_token
 from tests.factories.user import (
     build_deleted_user,
     build_plain_user,
@@ -327,3 +328,74 @@ async def test_confirm_email_change_rejects_taken_email(
     await session.refresh(email_change)
     assert user.email == "alice@example.com"
     assert email_change.confirmed_at is None
+
+
+@pytest.mark.asyncio
+async def test_confirm_email_change_rejects_email_taken_during_update(
+    client,
+    mock_utcnow,
+    mocker,
+    session,
+    session_factory,
+) -> None:
+    user = build_verified_user(email="alice@example.com")
+    session.add(user)
+    await session.flush()
+
+    now = datetime(2000, 10, 10, 0, 0, tzinfo=UTC)
+    mock_utcnow.return_value = now
+    email_change = UserEmailChange(
+        user_id=user.id,
+        old_email="alice@example.com",
+        new_email="alice.updated@example.com",
+        token_hash=hash_email_change_token("email-change-token"),
+        expires_at=now + timedelta(hours=1),
+    )
+    session.add(email_change)
+    await session.flush()
+
+    real_scalar = session.scalar
+    competing_email_inserted = False
+
+    async def scalar_with_competing_email_insert(*args, **kwargs):
+        nonlocal competing_email_inserted
+
+        result = await real_scalar(*args, **kwargs)
+
+        # Trigger the competing write only after our manual duplicate-email
+        # lookup has passed, so the final failure comes from the real DB index.
+        statement = str(args[0]) if args else ""
+        is_email_taken_lookup = (
+            '"user".email' in statement and '"user".id !=' in statement
+        )
+        if result is None and is_email_taken_lookup and not competing_email_inserted:
+            competing_email_inserted = True
+            async with session_factory() as other_session:
+                other_user = build_verified_user(email="alice.updated@example.com")
+                other_session.add(other_user)
+                await other_session.commit()
+
+        return result
+
+    mocker.patch.object(
+        session,
+        "scalar",
+        side_effect=scalar_with_competing_email_insert,
+    )
+
+    try:
+        response = await client.post(
+            app.url_path_for("auth:confirm-email-change"),
+            json={"token": "email-change-token"},
+        )
+
+        assert response.status_code == 400
+        assert competing_email_inserted is True
+    finally:
+        # The competing write commits outside the test transaction, so the
+        # normal fixture rollback cannot clean it up.
+        async with session_factory() as cleanup_session:
+            await cleanup_session.execute(
+                delete(User).where(User.email == "alice.updated@example.com")
+            )
+            await cleanup_session.commit()

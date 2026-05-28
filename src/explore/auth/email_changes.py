@@ -2,6 +2,7 @@ from datetime import timedelta
 
 from pydantic import EmailStr
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..utils import clock
@@ -13,6 +14,7 @@ from .models import (
 )
 
 EMAIL_CHANGE_TOKEN_LIFETIME_SECONDS = 3600
+USER_EMAIL_UNIQUE_INDEX = "ix_user_email"
 
 
 class EmailChangeEmailTaken(Exception):
@@ -112,6 +114,20 @@ async def confirm_email_change(
 
     user.email = email_change.new_email
     user.verified_at = email_change.confirmed_at
-    await session.flush()
+    try:
+        await session.flush()
+    except IntegrityError as error:
+        if _is_user_email_unique_violation(error):
+            raise EmailChangeEmailTaken() from None
+
+        raise
 
     return email_change
+
+
+def _is_user_email_unique_violation(error: IntegrityError) -> bool:
+    constraint_names = (
+        getattr(error.orig, "constraint_name", None),
+        getattr(error.orig.__cause__, "constraint_name", None),
+    )
+    return USER_EMAIL_UNIQUE_INDEX in constraint_names
