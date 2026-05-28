@@ -354,21 +354,30 @@ async def test_confirm_email_change_rejects_email_taken_during_update(
     session.add(email_change)
     await session.flush()
 
-    real_scalar = session.scalar
+    # Keep the real lookup available. The patch below only uses it to insert a
+    # competing user after our duplicate-email check has passed.
+    unpatched_scalar = session.scalar
     competing_email_inserted = False
 
-    async def scalar_with_competing_email_insert(*args, **kwargs):
+    def is_duplicate_email_check(statement: object) -> bool:
+        statement_text = str(statement)
+        return '"user".email' in statement_text and '"user".id !=' in statement_text
+
+    async def insert_competing_user_after_duplicate_check(*args, **kwargs):
         nonlocal competing_email_inserted
 
-        result = await real_scalar(*args, **kwargs)
+        result = await unpatched_scalar(*args, **kwargs)
 
-        # Trigger the competing write only after our manual duplicate-email
-        # lookup has passed, so the final failure comes from the real DB index.
-        statement = str(args[0]) if args else ""
-        is_email_taken_lookup = (
-            '"user".email' in statement and '"user".id !=' in statement
-        )
-        if result is None and is_email_taken_lookup and not competing_email_inserted:
+        # Once the manual duplicate-email check returns no match, another
+        # transaction claims that email before this request reaches its update.
+        # That lets the real database unique index, not a fake flush, reject
+        # the race.
+        if (
+            result is None
+            and args
+            and is_duplicate_email_check(args[0])
+            and not competing_email_inserted
+        ):
             competing_email_inserted = True
             async with session_factory() as other_session:
                 other_user = build_verified_user(email="alice.updated@example.com")
@@ -380,7 +389,7 @@ async def test_confirm_email_change_rejects_email_taken_during_update(
     mocker.patch.object(
         session,
         "scalar",
-        side_effect=scalar_with_competing_email_insert,
+        side_effect=insert_competing_user_after_duplicate_check,
     )
 
     try:
