@@ -3,7 +3,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..db.config import get_async_session
 from .backends.redis import backend as redis_backend
-from .dependencies import current_user, current_user_token, fastapi_users
+from .dependencies import (
+    current_user,
+    current_user_token,
+    fastapi_users,
+    optional_current_user_token,
+)
 from .email_changes import (
     EmailChangeBadToken,
     EmailChangeEmailTaken,
@@ -142,10 +147,12 @@ async def request_current_user_email_change(
 )
 async def confirm_current_user_email_change(
     email_change_confirm: EmailChangeConfirm,
+    user_token: tuple[User, str] | None = Depends(optional_current_user_token),
     session: AsyncSession = Depends(get_async_session),
+    strategy=Depends(redis_backend.get_strategy),
 ):
     try:
-        await confirm_email_change(
+        email_change = await confirm_email_change(
             session=session,
             token=email_change_confirm.token,
         )
@@ -159,6 +166,11 @@ async def confirm_current_user_email_change(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="EMAIL_CHANGE_EMAIL_TAKEN",
         ) from None
+
+    if user_token is not None:
+        user, token = user_token
+        if user.id == email_change.user_id:
+            await redis_backend.logout(strategy, user, token)
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 

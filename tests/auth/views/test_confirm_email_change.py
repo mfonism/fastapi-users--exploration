@@ -47,6 +47,79 @@ async def test_confirm_email_change_updates_user_email(
 
 
 @pytest.mark.asyncio
+async def test_confirm_email_change_logs_out_matching_current_session(
+    client,
+    authenticate_as,
+    mock_utcnow,
+    session,
+) -> None:
+    user = build_verified_user(email="alice@example.com")
+    session.add(user)
+    await session.flush()
+    await authenticate_as(client, user)
+
+    confirmed_at = datetime(2000, 10, 10, 0, 0, tzinfo=UTC)
+    mock_utcnow.return_value = confirmed_at
+    email_change = UserEmailChange(
+        user_id=user.id,
+        old_email="alice@example.com",
+        new_email="alice.updated@example.com",
+        token_hash=hash_email_change_token("email-change-token"),
+        expires_at=confirmed_at + timedelta(hours=1),
+    )
+    session.add(email_change)
+    await session.flush()
+
+    response = await client.post(
+        app.url_path_for("auth:confirm-email-change"),
+        json={"token": "email-change-token"},
+    )
+
+    assert response.status_code == 204
+
+    # Confirming this user's identity change should log this session out.
+    logout_response = await client.post(app.url_path_for("auth:redis.logout"))
+    assert logout_response.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_confirm_email_change_keeps_unrelated_current_session(
+    client,
+    authenticate_as,
+    mock_utcnow,
+    session,
+) -> None:
+    current_user = build_verified_user(email="alice@example.com")
+    email_change_user = build_verified_user(email="bob@example.com")
+    session.add_all([current_user, email_change_user])
+    await session.flush()
+    await authenticate_as(client, current_user)
+
+    confirmed_at = datetime(2000, 10, 10, 0, 0, tzinfo=UTC)
+    mock_utcnow.return_value = confirmed_at
+    email_change = UserEmailChange(
+        user_id=email_change_user.id,
+        old_email="bob@example.com",
+        new_email="bob.updated@example.com",
+        token_hash=hash_email_change_token("email-change-token"),
+        expires_at=confirmed_at + timedelta(hours=1),
+    )
+    session.add(email_change)
+    await session.flush()
+
+    response = await client.post(
+        app.url_path_for("auth:confirm-email-change"),
+        json={"token": "email-change-token"},
+    )
+
+    assert response.status_code == 204
+
+    # Confirming another user's identity change should not log this session out.
+    logout_response = await client.post(app.url_path_for("auth:redis.logout"))
+    assert logout_response.status_code == 204
+
+
+@pytest.mark.asyncio
 async def test_confirm_email_change_rejects_unknown_token(client) -> None:
     response = await client.post(
         app.url_path_for("auth:confirm-email-change"),
