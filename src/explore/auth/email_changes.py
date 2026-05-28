@@ -19,6 +19,10 @@ class EmailChangeEmailTaken(Exception):
     pass
 
 
+class EmailChangeBadToken(Exception):
+    pass
+
+
 class EmailChangeSameEmail(Exception):
     pass
 
@@ -69,3 +73,45 @@ async def cancel_unresolved_email_changes(
 
     for email_change in unresolved_email_changes:
         email_change.cancel()
+
+
+async def confirm_email_change(
+    *,
+    session: AsyncSession,
+    token: str,
+) -> UserEmailChange:
+    email_change = await session.scalar(
+        select(UserEmailChange).where(
+            UserEmailChange.token_hash == hash_email_change_token(token)
+        )
+    )
+    if email_change is None:
+        raise EmailChangeBadToken()
+
+    if not email_change.is_usable():
+        raise EmailChangeBadToken()
+
+    user = await session.get(User, email_change.user_id)
+    if user is None:
+        raise EmailChangeBadToken()
+
+    if user.is_deleted or not user.is_active:
+        raise EmailChangeBadToken()
+
+    existing_user = await session.scalar(
+        select(User).where(
+            User.email == email_change.new_email,
+            User.id != user.id,
+        )
+    )
+    if existing_user is not None:
+        raise EmailChangeEmailTaken()
+
+    if not email_change.confirm():
+        raise EmailChangeBadToken()
+
+    user.email = email_change.new_email
+    user.verified_at = email_change.confirmed_at
+    await session.flush()
+
+    return email_change

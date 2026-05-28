@@ -5,8 +5,10 @@ from ..db.config import get_async_session
 from .backends.redis import backend as redis_backend
 from .dependencies import current_user, current_user_token, fastapi_users
 from .email_changes import (
+    EmailChangeBadToken,
     EmailChangeEmailTaken,
     EmailChangeSameEmail,
+    confirm_email_change,
     request_email_change,
 )
 from .models import User, UserManager, get_user_manager
@@ -14,6 +16,7 @@ from .notifications import send_email_change_request
 from .schemas import (
     CurrentUserRead,
     CurrentUserUpdate,
+    EmailChangeConfirm,
     EmailChangeRequest,
     PasswordChange,
     UserCreate,
@@ -128,6 +131,35 @@ async def request_current_user_email_change(
         recipient_name=user.full_name,
         token=token,
     )
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post(
+    "/auth/confirm-email-change",
+    status_code=status.HTTP_204_NO_CONTENT,
+    name="auth:confirm-email-change",
+    tags=["auth"],
+)
+async def confirm_current_user_email_change(
+    email_change_confirm: EmailChangeConfirm,
+    session: AsyncSession = Depends(get_async_session),
+):
+    try:
+        await confirm_email_change(
+            session=session,
+            token=email_change_confirm.token,
+        )
+    except EmailChangeBadToken:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="EMAIL_CHANGE_BAD_TOKEN",
+        ) from None
+    except EmailChangeEmailTaken:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="EMAIL_CHANGE_EMAIL_TAKEN",
+        ) from None
+
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 

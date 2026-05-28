@@ -46,6 +46,10 @@ class EmailChangeRequest(BaseModel):
     new_email: EmailStr
 
 
+class EmailChangeConfirm(BaseModel):
+    token: str = Field(json_schema_extra={"writeOnly": True})
+
+
 class CurrentUserUpdate(schemas.CreateUpdateDictModel):
     full_name: str | None = None
 
