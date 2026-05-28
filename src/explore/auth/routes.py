@@ -1,11 +1,20 @@
 from fastapi import APIRouter, Depends, HTTPException, Response, status
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from ..db.config import get_async_session
 from .backends.redis import backend as redis_backend
 from .dependencies import current_user, current_user_token, fastapi_users
+from .email_changes import (
+    EmailChangeEmailTaken,
+    EmailChangeSameEmail,
+    request_email_change,
+)
 from .models import User, UserManager, get_user_manager
+from .notifications import send_email_change_request
 from .schemas import (
     CurrentUserRead,
     CurrentUserUpdate,
+    EmailChangeRequest,
     PasswordChange,
     UserCreate,
 )
@@ -83,6 +92,42 @@ async def deactivate(
     user_manager: UserManager = Depends(get_user_manager),
 ):
     await user_manager._update(user, {"is_active": False})
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post(
+    "/auth/request-email-change",
+    status_code=status.HTTP_204_NO_CONTENT,
+    name="auth:request-email-change",
+    tags=["auth"],
+)
+async def request_current_user_email_change(
+    email_change_request: EmailChangeRequest,
+    user: User = Depends(current_user),
+    session: AsyncSession = Depends(get_async_session),
+):
+    try:
+        _, token = await request_email_change(
+            session=session,
+            user=user,
+            new_email=email_change_request.new_email,
+        )
+    except EmailChangeSameEmail:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="EMAIL_CHANGE_SAME_EMAIL",
+        ) from None
+    except EmailChangeEmailTaken:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="EMAIL_CHANGE_EMAIL_TAKEN",
+        ) from None
+
+    await send_email_change_request(
+        recipient_email=str(email_change_request.new_email),
+        recipient_name=user.full_name,
+        token=token,
+    )
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 

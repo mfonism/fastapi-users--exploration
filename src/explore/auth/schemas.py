@@ -42,6 +42,10 @@ class PasswordChange(BaseModel):
     new_password: str = Field(json_schema_extra={"writeOnly": True})
 
 
+class EmailChangeRequest(BaseModel):
+    new_email: EmailStr
+
+
 class CurrentUserUpdate(schemas.CreateUpdateDictModel):
     full_name: str | None = None
 
