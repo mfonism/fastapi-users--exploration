@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Any
 
 import jwt
+from email_validator import EmailNotValidError
 from fastapi import Depends, Request, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_users import BaseUserManager, UUIDIDMixin, exceptions
@@ -19,6 +20,7 @@ from ..db.base import Base
 from ..db.config import get_async_session
 from ..settings import settings
 from ..utils import clock
+from .email_identity import normalize_email
 from .exceptions import UserDeleted
 from .notifications import send_password_reset_request, send_verification_request
 
@@ -212,6 +214,12 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
             raise UserDeleted()
 
     async def authenticate(self, credentials: OAuth2PasswordRequestForm):
+        try:
+            credentials.username = normalize_email(credentials.username)
+        except EmailNotValidError:
+            self.password_helper.hash(credentials.password)
+            return None
+
         user = await super().authenticate(credentials)
 
         if user is not None:
