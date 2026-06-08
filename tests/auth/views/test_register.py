@@ -81,6 +81,39 @@ async def test_register_sends_verification_request(client, mocker) -> None:
 
 
 @pytest.mark.asyncio
+async def test_register_normalizes_email(client, mocker, session) -> None:
+    mock_send_verification_request = mocker.patch(
+        "explore.auth.models.send_verification_request",
+        autospec=True,
+    )
+    terms_accepted_at = datetime(2000, 10, 10, 0, 0, tzinfo=UTC)
+
+    response = await client.post(
+        app.url_path_for("register:register"),
+        json={
+            "email": "alice@ｅｘａｍｐｌｅ.com",
+            "full_name": "Alice Example",
+            "password": "strongpass123",
+            "terms_accepted_at": terms_accepted_at.isoformat(),
+        },
+    )
+
+    assert response.status_code == 201
+
+    payload = response.json()
+    assert payload["email"] == "alice@example.com"
+
+    user = await session.get(User, uuid.UUID(payload["id"]))
+    assert user is not None
+    assert user.email == "alice@example.com"
+    mock_send_verification_request.assert_awaited_once_with(
+        recipient_email="alice@example.com",
+        recipient_name="Alice Example",
+        token=mocker.ANY,
+    )
+
+
+@pytest.mark.asyncio
 async def test_register_rejects_duplicate_email(client, mocker, session) -> None:
     mock_send_verification_request = mocker.patch(
         "explore.auth.models.send_verification_request",
@@ -94,6 +127,33 @@ async def test_register_rejects_duplicate_email(client, mocker, session) -> None
         app.url_path_for("register:register"),
         json={
             "email": duplicate_email,
+            "full_name": "Eve All",
+            "password": "anotherstrongpass456",
+            "terms_accepted_at": datetime(2000, 10, 10, 0, 5, tzinfo=UTC).isoformat(),
+        },
+    )
+
+    assert response.status_code == 400
+    mock_send_verification_request.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_register_rejects_duplicate_normalized_email(
+    client,
+    mocker,
+    session,
+) -> None:
+    mock_send_verification_request = mocker.patch(
+        "explore.auth.models.send_verification_request",
+        autospec=True,
+    )
+    session.add(build_signed_up_user(email="alice@example.com"))
+    await session.flush()
+
+    response = await client.post(
+        app.url_path_for("register:register"),
+        json={
+            "email": "alice@ｅｘａｍｐｌｅ.com",
             "full_name": "Eve All",
             "password": "anotherstrongpass456",
             "terms_accepted_at": datetime(2000, 10, 10, 0, 5, tzinfo=UTC).isoformat(),
@@ -134,6 +194,17 @@ async def test_register_rejects_duplicate_email(client, mocker, session) -> None
                 "terms_accepted_at": "not-a-datetime",
             },
             id="invalid_terms_accepted_at",
+        ),
+        pytest.param(
+            {
+                "email": "not-an-email",
+                "full_name": "Alice Example",
+                "password": "strongpass123",
+                "terms_accepted_at": datetime(
+                    2000, 10, 10, 0, 0, tzinfo=UTC
+                ).isoformat(),
+            },
+            id="invalid_email",
         ),
     ],
 )
