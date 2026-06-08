@@ -26,7 +26,7 @@ async def test_request_verify_token_sends_verification_request(
 
     response = await client.post(
         app.url_path_for("verify:request-token"),
-        json={"email": "alice@example.com"},
+        json={"email": "alice@ｅｘａｍｐｌｅ.com"},
     )
 
     assert response.status_code == 202

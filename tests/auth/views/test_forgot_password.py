@@ -26,7 +26,7 @@ async def test_forgot_password_sends_password_reset_request(
 
     response = await client.post(
         app.url_path_for("reset:forgot_password"),
-        json={"email": "alice@example.com"},
+        json={"email": "alice@ｅｘａｍｐｌｅ.com"},
     )
 
     assert response.status_code == 202

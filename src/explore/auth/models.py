@@ -213,6 +213,14 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
         if user.is_deleted:
             raise UserDeleted()
 
+    async def get_by_email(self, user_email: str) -> User:
+        try:
+            user_email = normalize_email(user_email)
+        except EmailNotValidError:
+            raise exceptions.UserNotExists() from None
+
+        return await super().get_by_email(user_email)
+
     async def authenticate(self, credentials: OAuth2PasswordRequestForm):
         try:
             credentials.username = normalize_email(credentials.username)
