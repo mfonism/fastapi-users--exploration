@@ -63,6 +63,43 @@ async def test_request_email_change_stores_request(
 
 
 @pytest.mark.asyncio
+async def test_request_email_change_normalizes_email(
+    client,
+    authenticate_as,
+    mocker,
+    session,
+) -> None:
+    user = build_verified_user(email="alice@example.com", full_name="Alice Example")
+    session.add(user)
+    await session.flush()
+    await authenticate_as(client, user)
+    mocker.patch(
+        "explore.auth.email_changes.generate_email_change_token",
+        return_value="email-change-token",
+    )
+    mock_send_email_change_request = mocker.patch(
+        "explore.auth.routes.send_email_change_request",
+        autospec=True,
+    )
+
+    response = await client.post(
+        app.url_path_for("auth:request-email-change"),
+        json={"new_email": "alice.updated@ｅｘａｍｐｌｅ.com"},
+    )
+
+    assert response.status_code == 204
+
+    email_change = await session.scalar(select(UserEmailChange))
+    assert email_change is not None
+    assert email_change.new_email == "alice.updated@example.com"
+    mock_send_email_change_request.assert_awaited_once_with(
+        recipient_email="alice.updated@example.com",
+        recipient_name="Alice Example",
+        token="email-change-token",
+    )
+
+
+@pytest.mark.asyncio
 async def test_request_email_change_rejects_current_email(
     client,
     authenticate_as,

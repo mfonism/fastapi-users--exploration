@@ -6,6 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..utils import clock
+from .email_identity import normalize_email
 from .models import (
     User,
     UserEmailChange,
@@ -35,7 +36,7 @@ async def request_email_change(
     user: User,
     new_email: EmailStr,
 ) -> tuple[UserEmailChange, str]:
-    new_email = str(new_email)
+    new_email = normalize_email(str(new_email))
     if new_email == user.email:
         raise EmailChangeSameEmail()
 
