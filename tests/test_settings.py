@@ -2,7 +2,9 @@ from explore.env import AppEnv
 from explore.settings import Settings
 
 
-def test_db_echo_defaults_to_false() -> None:
+def test_db_echo_defaults_to_false(monkeypatch) -> None:
+    monkeypatch.delenv("DEBUG", raising=False)
+
     settings = Settings(app_env=AppEnv.TEST)
 
     assert settings.debug is True
