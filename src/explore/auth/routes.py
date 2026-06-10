@@ -9,6 +9,7 @@ from .dependencies import (
     fastapi_users,
     optional_current_user_token,
 )
+from .email_changes.schemas import EmailChangeConfirm, EmailChangeRequest
 from .email_changes.service import (
     EmailChangeBadToken,
     EmailChangeEmailTaken,
@@ -21,8 +22,6 @@ from .notifications import send_email_change_request
 from .schemas import (
     CurrentUserRead,
     CurrentUserUpdate,
-    EmailChangeConfirm,
-    EmailChangeRequest,
     PasswordChange,
     UserCreate,
 )
