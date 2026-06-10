@@ -23,15 +23,6 @@ class UserRead(schemas.CreateUpdateDictModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class CurrentUserRead(schemas.CreateUpdateDictModel):
-    id: uuid.UUID
-    email: EmailStr
-    full_name: str
-    created_at: datetime
-
-    model_config = ConfigDict(from_attributes=True)
-
-
 class UserCreate(schemas.CreateUpdateDictModel):
     email: EmailStr
     full_name: str
@@ -47,12 +38,3 @@ class UserCreate(schemas.CreateUpdateDictModel):
 class PasswordChange(BaseModel):
     current_password: str = Field(json_schema_extra={"writeOnly": True})
     new_password: str = Field(json_schema_extra={"writeOnly": True})
-
-
-class CurrentUserUpdate(schemas.CreateUpdateDictModel):
-    full_name: str | None = None
-
-    model_config = ConfigDict(extra="forbid")
-
-    def create_update_dict(self):
-        return self.model_dump(exclude_unset=True)

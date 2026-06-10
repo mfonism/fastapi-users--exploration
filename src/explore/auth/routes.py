@@ -9,11 +9,10 @@ from .dependencies import (
 from .email_changes.routes import router as email_changes_router
 from .models import User, UserManager, get_user_manager
 from .schemas import (
-    CurrentUserRead,
-    CurrentUserUpdate,
     PasswordChange,
     UserCreate,
 )
+from .users.schemas import CurrentUserRead, CurrentUserUpdate
 
 router = APIRouter()
 
