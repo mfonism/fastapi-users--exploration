@@ -29,7 +29,7 @@ async def test_request_email_change_stores_request(
         return_value="email-change-token",
     )
     mock_send_email_change_request = mocker.patch(
-        "explore.auth.routes.send_email_change_request",
+        "explore.auth.email_changes.routes.send_email_change_request",
         autospec=True,
     )
 
@@ -78,7 +78,7 @@ async def test_request_email_change_normalizes_email(
         return_value="email-change-token",
     )
     mock_send_email_change_request = mocker.patch(
-        "explore.auth.routes.send_email_change_request",
+        "explore.auth.email_changes.routes.send_email_change_request",
         autospec=True,
     )
 
@@ -111,7 +111,7 @@ async def test_request_email_change_rejects_current_email(
     await session.flush()
     await authenticate_as(client, user)
     mock_send_email_change_request = mocker.patch(
-        "explore.auth.routes.send_email_change_request",
+        "explore.auth.email_changes.routes.send_email_change_request",
         autospec=True,
     )
 
@@ -138,7 +138,7 @@ async def test_request_email_change_rejects_used_email(
     await session.flush()
     await authenticate_as(client, user)
     mock_send_email_change_request = mocker.patch(
-        "explore.auth.routes.send_email_change_request",
+        "explore.auth.email_changes.routes.send_email_change_request",
         autospec=True,
     )
 
@@ -188,7 +188,10 @@ async def test_request_email_change_cancels_unresolved_requests(
         "explore.auth.email_changes.service.generate_email_change_token",
         return_value="second-token",
     )
-    mocker.patch("explore.auth.routes.send_email_change_request", autospec=True)
+    mocker.patch(
+        "explore.auth.email_changes.routes.send_email_change_request",
+        autospec=True,
+    )
 
     response = await client.post(
         app.url_path_for("auth:request-email-change"),
