@@ -5,9 +5,9 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..utils import clock
-from .email_identity import normalize_email
-from .models import (
+from ...utils import clock
+from ..email_identity import normalize_email
+from ..models import (
     User,
     UserEmailChange,
     generate_email_change_token,

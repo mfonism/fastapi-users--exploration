@@ -9,7 +9,7 @@ from .dependencies import (
     fastapi_users,
     optional_current_user_token,
 )
-from .email_changes import (
+from .email_changes.service import (
     EmailChangeBadToken,
     EmailChangeEmailTaken,
     EmailChangeSameEmail,

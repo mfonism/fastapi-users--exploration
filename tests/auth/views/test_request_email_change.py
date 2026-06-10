@@ -4,7 +4,7 @@ import pytest
 from sqlalchemy import select
 
 from explore.app import app
-from explore.auth.email_changes import EMAIL_CHANGE_TOKEN_LIFETIME_SECONDS
+from explore.auth.email_changes.service import EMAIL_CHANGE_TOKEN_LIFETIME_SECONDS
 from explore.auth.models import UserEmailChange, hash_email_change_token
 from tests.factories.user import build_verified_user
 
@@ -25,7 +25,7 @@ async def test_request_email_change_stores_request(
     requested_at = datetime(2000, 10, 10, 0, 0, tzinfo=UTC)
     mock_utcnow.return_value = requested_at
     mocker.patch(
-        "explore.auth.email_changes.generate_email_change_token",
+        "explore.auth.email_changes.service.generate_email_change_token",
         return_value="email-change-token",
     )
     mock_send_email_change_request = mocker.patch(
@@ -74,7 +74,7 @@ async def test_request_email_change_normalizes_email(
     await session.flush()
     await authenticate_as(client, user)
     mocker.patch(
-        "explore.auth.email_changes.generate_email_change_token",
+        "explore.auth.email_changes.service.generate_email_change_token",
         return_value="email-change-token",
     )
     mock_send_email_change_request = mocker.patch(
@@ -185,7 +185,7 @@ async def test_request_email_change_cancels_unresolved_requests(
     requested_at = datetime(2000, 10, 10, 0, 30, tzinfo=UTC)
     mock_utcnow.return_value = requested_at
     mocker.patch(
-        "explore.auth.email_changes.generate_email_change_token",
+        "explore.auth.email_changes.service.generate_email_change_token",
         return_value="second-token",
     )
     mocker.patch("explore.auth.routes.send_email_change_request", autospec=True)
