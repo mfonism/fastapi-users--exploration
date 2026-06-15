@@ -2,9 +2,7 @@ import uuid
 from datetime import datetime
 
 from fastapi_users import schemas
-from pydantic import ConfigDict, EmailStr, Field
-
-from .email_identity import normalize_email
+from pydantic import ConfigDict, EmailStr
 
 
 class UserRead(schemas.CreateUpdateDictModel):
@@ -21,15 +19,3 @@ class UserRead(schemas.CreateUpdateDictModel):
     terms_accepted_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
-
-
-class UserCreate(schemas.CreateUpdateDictModel):
-    email: EmailStr
-    full_name: str
-    password: str = Field(json_schema_extra={"writeOnly": True})
-    terms_accepted_at: datetime
-
-    def create_update_dict(self):
-        user_dict = super().create_update_dict()
-        user_dict["email"] = normalize_email(user_dict["email"])
-        return user_dict

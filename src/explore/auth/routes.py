@@ -3,9 +3,7 @@ from fastapi import APIRouter
 from .dependencies import fastapi_users
 from .email_changes.routes import router as email_changes_router
 from .passwords.routes import router as passwords_router
-from .schemas import (
-    UserCreate,
-)
+from .registration.schemas import UserCreate
 from .sessions.routes import router as sessions_router
 from .users.routes import router as users_router
 from .users.schemas import CurrentUserRead
