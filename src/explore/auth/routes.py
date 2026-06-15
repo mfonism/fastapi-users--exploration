@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, Response, status
 
 from .backends.redis import backend as redis_backend
 from .dependencies import (
@@ -7,7 +7,7 @@ from .dependencies import (
 )
 from .email_changes.routes import router as email_changes_router
 from .models import User, UserManager, get_user_manager
-from .passwords.schemas import PasswordChange
+from .passwords.routes import router as passwords_router
 from .schemas import (
     UserCreate,
 )
@@ -50,32 +50,8 @@ router.include_router(
     tags=["auth"],
 )
 router.include_router(email_changes_router)
+router.include_router(passwords_router)
 router.include_router(users_router)
-
-
-@router.post(
-    "/auth/change-password",
-    status_code=status.HTTP_204_NO_CONTENT,
-    name="auth:change-password",
-    tags=["auth"],
-)
-async def change_password(
-    password_change: PasswordChange,
-    user: User = Depends(current_user),
-    user_manager: UserManager = Depends(get_user_manager),
-):
-    password_verified, _ = user_manager.password_helper.verify_and_update(
-        password_change.current_password,
-        user.hashed_password,
-    )
-    if not password_verified:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="CHANGE_PASSWORD_BAD_PASSWORD",
-        )
-
-    await user_manager._update(user, {"password": password_change.new_password})
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.post(
