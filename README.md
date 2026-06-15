@@ -164,6 +164,11 @@ PostgreSQL server version is checked in startup code (`src/explore/db/config.py`
 
 ## Alembic commands
 
+When you add a new SQLAlchemy model, also import it in
+`src/explore/db/registry.py`. Alembic loads that registry before reading
+`Base.metadata`; without the import, autogenerate may miss the new table or
+think an existing table disappeared.
+
 Create a migration from model changes:
 
 ```bash
