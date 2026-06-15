@@ -7,8 +7,8 @@ from .dependencies import (
 )
 from .email_changes.routes import router as email_changes_router
 from .models import User, UserManager, get_user_manager
+from .passwords.schemas import PasswordChange
 from .schemas import (
-    PasswordChange,
     UserCreate,
 )
 from .users.routes import router as users_router
