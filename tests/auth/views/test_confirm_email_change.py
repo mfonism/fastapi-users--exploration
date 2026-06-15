@@ -4,7 +4,8 @@ import pytest
 from sqlalchemy import delete
 
 from explore.app import app
-from explore.auth.models import User, UserEmailChange, hash_email_change_token
+from explore.auth.email_changes.models import UserEmailChange, hash_email_change_token
+from explore.auth.users.models import User
 from tests.factories.user import (
     build_deleted_user,
     build_plain_user,

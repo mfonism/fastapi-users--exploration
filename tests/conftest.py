@@ -16,7 +16,8 @@ os.environ.setdefault("APP_ENV", AppEnv.TEST.value)
 
 from explore.app import app
 from explore.auth.backends.redis import get_strategy
-from explore.auth.models import User, UserManager, get_user_manager
+from explore.auth.users.manager import UserManager, get_user_manager
+from explore.auth.users.models import User
 from explore.db.config import (
     create_engine,
     get_async_session,

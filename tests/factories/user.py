@@ -1,7 +1,7 @@
 from collections.abc import Mapping
 from datetime import UTC, datetime
 
-from explore.auth.models import User
+from explore.auth.users.models import User
 
 __all__ = [
     "build_deleted_user",

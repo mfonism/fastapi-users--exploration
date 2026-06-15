@@ -4,8 +4,8 @@ import pytest
 from sqlalchemy import select
 
 from explore.app import app
+from explore.auth.email_changes.models import UserEmailChange, hash_email_change_token
 from explore.auth.email_changes.service import EMAIL_CHANGE_TOKEN_LIFETIME_SECONDS
-from explore.auth.models import UserEmailChange, hash_email_change_token
 from tests.factories.user import build_verified_user
 
 

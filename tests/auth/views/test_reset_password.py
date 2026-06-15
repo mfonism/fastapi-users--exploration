@@ -2,7 +2,7 @@ import pytest
 from fastapi_users.jwt import generate_jwt
 
 from explore.app import app
-from explore.auth.models import UserManager
+from explore.auth.users.manager import UserManager
 from tests.factories.user import build_deleted_user, build_signed_up_user
 
 

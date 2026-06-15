@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 
 import pytest
 
-from explore.auth.models import UserManager
+from explore.auth.users.manager import UserManager
 from tests.factories.user import (
     build_deleted_user,
     build_plain_user,

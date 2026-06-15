@@ -1,6 +1,6 @@
 from datetime import UTC, datetime, timedelta
 
-from explore.auth.models import (
+from explore.auth.email_changes.models import (
     UserEmailChange,
     generate_email_change_token,
     hash_email_change_token,

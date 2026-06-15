@@ -4,7 +4,7 @@ import pytest
 from fastapi_users.jwt import generate_jwt
 
 from explore.app import app
-from explore.auth.models import UserManager
+from explore.auth.users.manager import UserManager
 from tests.auth.views.assertions import assert_internal_user_fields_hidden
 from tests.factories.user import build_signed_up_user
 
