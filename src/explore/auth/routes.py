@@ -1,12 +1,8 @@
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, status
 
 from .backends.redis import backend as redis_backend
-from .dependencies import (
-    current_user,
-    fastapi_users,
-)
+from .dependencies import fastapi_users
 from .email_changes.routes import router as email_changes_router
-from .models import User, UserManager, get_user_manager
 from .passwords.routes import router as passwords_router
 from .schemas import (
     UserCreate,
@@ -52,17 +48,3 @@ router.include_router(
 router.include_router(email_changes_router)
 router.include_router(passwords_router)
 router.include_router(users_router)
-
-
-@router.post(
-    "/auth/deactivate",
-    status_code=status.HTTP_204_NO_CONTENT,
-    name="auth:deactivate",
-    tags=["auth"],
-)
-async def deactivate(
-    user: User = Depends(current_user),
-    user_manager: UserManager = Depends(get_user_manager),
-):
-    await user_manager._update(user, {"is_active": False})
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
