@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ...utils import clock
-from ..email_identity import normalize_email
+from ...utils.email import normalize_email
 from ..models import (
     User,
     UserEmailChange,

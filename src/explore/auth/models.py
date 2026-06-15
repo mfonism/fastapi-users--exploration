@@ -20,7 +20,7 @@ from ..db.base import Base
 from ..db.config import get_async_session
 from ..settings import settings
 from ..utils import clock
-from .email_identity import normalize_email
+from ..utils.email import normalize_email
 from .exceptions import UserDeleted
 from .notifications import send_password_reset_request, send_verification_request
 

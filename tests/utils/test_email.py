@@ -1,7 +1,7 @@
 import pytest
 from email_validator import EmailNotValidError
 
-from explore.auth.email_identity import normalize_email
+from explore.utils.email import normalize_email
 
 
 def test_normalize_email_canonicalizes_domain() -> None:
