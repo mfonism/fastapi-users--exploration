@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, Response, status
 
 from ..backends.redis import backend as redis_backend
 from ..dependencies import current_user, current_user_token
-from ..models import User, UserManager, get_user_manager
+from .manager import UserManager, get_user_manager
+from .models import User
 from .schemas import CurrentUserRead, CurrentUserUpdate
 
 router = APIRouter()

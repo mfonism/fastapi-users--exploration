@@ -4,8 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ...db.config import get_async_session
 from ..backends.redis import backend as redis_backend
 from ..dependencies import current_user, optional_current_user_token
-from ..models import User
 from ..notifications import send_email_change_request
+from ..users.models import User
 from .schemas import EmailChangeConfirm, EmailChangeRequest
 from .service import (
     EmailChangeBadToken,

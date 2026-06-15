@@ -58,7 +58,7 @@ async def test_register_sends_verification_request(client, mocker) -> None:
         return_value=verification_token,
     )
     mock_send_verification_request = mocker.patch(
-        "explore.auth.models.send_verification_request",
+        "explore.auth.users.manager.send_verification_request",
         autospec=True,
     )
 
@@ -83,7 +83,7 @@ async def test_register_sends_verification_request(client, mocker) -> None:
 @pytest.mark.asyncio
 async def test_register_normalizes_email(client, mocker, session) -> None:
     mock_send_verification_request = mocker.patch(
-        "explore.auth.models.send_verification_request",
+        "explore.auth.users.manager.send_verification_request",
         autospec=True,
     )
     terms_accepted_at = datetime(2000, 10, 10, 0, 0, tzinfo=UTC)
@@ -116,7 +116,7 @@ async def test_register_normalizes_email(client, mocker, session) -> None:
 @pytest.mark.asyncio
 async def test_register_rejects_duplicate_email(client, mocker, session) -> None:
     mock_send_verification_request = mocker.patch(
-        "explore.auth.models.send_verification_request",
+        "explore.auth.users.manager.send_verification_request",
         autospec=True,
     )
     duplicate_email = "alice@example.com"
@@ -144,7 +144,7 @@ async def test_register_rejects_duplicate_normalized_email(
     session,
 ) -> None:
     mock_send_verification_request = mocker.patch(
-        "explore.auth.models.send_verification_request",
+        "explore.auth.users.manager.send_verification_request",
         autospec=True,
     )
     session.add(build_signed_up_user(email="alice@example.com"))
@@ -210,7 +210,7 @@ async def test_register_rejects_duplicate_normalized_email(
 )
 async def test_register_validates_payload(client, mocker, payload) -> None:
     mock_send_verification_request = mocker.patch(
-        "explore.auth.models.send_verification_request",
+        "explore.auth.users.manager.send_verification_request",
         autospec=True,
     )
 

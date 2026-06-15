@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 
 from ..dependencies import current_user
-from ..models import User, UserManager, get_user_manager
+from ..users.manager import UserManager, get_user_manager
+from ..users.models import User
 from .schemas import PasswordChange
 
 router = APIRouter()

@@ -7,8 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ...utils import clock
 from ...utils.email import normalize_email
-from ..models import (
-    User,
+from ..users.models import User
+from .models import (
     UserEmailChange,
     generate_email_change_token,
     hash_email_change_token,

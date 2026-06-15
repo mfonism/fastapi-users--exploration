@@ -16,7 +16,7 @@ async def test_forgot_password_sends_password_reset_request(
         return_value=reset_token,
     )
     mock_send_password_reset_request = mocker.patch(
-        "explore.auth.models.send_password_reset_request",
+        "explore.auth.users.manager.send_password_reset_request",
         autospec=True,
     )
 
@@ -44,7 +44,7 @@ async def test_forgot_password_hides_deleted_user(
     session,
 ) -> None:
     mock_send_password_reset_request = mocker.patch(
-        "explore.auth.models.send_password_reset_request",
+        "explore.auth.users.manager.send_password_reset_request",
         autospec=True,
     )
 

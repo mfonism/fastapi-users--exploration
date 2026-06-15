@@ -16,7 +16,7 @@ async def test_request_verify_token_sends_verification_request(
         return_value=verification_token,
     )
     mock_send_verification_request = mocker.patch(
-        "explore.auth.models.send_verification_request",
+        "explore.auth.users.manager.send_verification_request",
         autospec=True,
     )
 
@@ -45,7 +45,7 @@ async def test_request_verify_token_hides_deleted_user(
     session,
 ) -> None:
     mock_send_verification_request = mocker.patch(
-        "explore.auth.models.send_verification_request",
+        "explore.auth.users.manager.send_verification_request",
         autospec=True,
     )
 
