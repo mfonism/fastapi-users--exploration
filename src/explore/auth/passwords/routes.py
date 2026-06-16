@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, Response, status
 
 from ..dependencies import current_user
 from ..users.manager import UserManager, get_user_manager
 from ..users.models import User
+from .exceptions import ChangePasswordBadPassword
 from .schemas import PasswordChange
 
 router = APIRouter()
@@ -24,10 +25,7 @@ async def change_password(
         user.hashed_password,
     )
     if not password_verified:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="CHANGE_PASSWORD_BAD_PASSWORD",
-        )
+        raise ChangePasswordBadPassword()
 
     await user_manager._update(user, {"password": password_change.new_password})
     return Response(status_code=status.HTTP_204_NO_CONTENT)
