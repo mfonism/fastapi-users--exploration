@@ -8,6 +8,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ...utils import clock
 from ...utils.email import normalize_email
 from ..users.models import User
+from .exceptions import (
+    EmailChangeBadToken,
+    EmailChangeEmailTaken,
+    EmailChangeSameEmail,
+)
 from .models import (
     UserEmailChange,
     generate_email_change_token,
@@ -16,18 +21,6 @@ from .models import (
 
 EMAIL_CHANGE_TOKEN_LIFETIME_SECONDS = 3600
 USER_EMAIL_UNIQUE_INDEX = "ix_user_email"
-
-
-class EmailChangeEmailTaken(Exception):
-    pass
-
-
-class EmailChangeBadToken(Exception):
-    pass
-
-
-class EmailChangeSameEmail(Exception):
-    pass
 
 
 async def request_email_change(

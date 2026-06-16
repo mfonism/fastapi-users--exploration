@@ -7,6 +7,7 @@ from fastapi_users.router.common import ErrorCode
 from .auth.exceptions import UserDeleted
 from .auth.routes import router as auth_router
 from .db.config import init_db
+from .exceptions import AppAPIError
 from .settings import settings
 
 
@@ -19,6 +20,14 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan, debug=settings.debug)
 
 app.include_router(auth_router)
+
+
+@app.exception_handler(AppAPIError)
+async def app_api_error_exception_handler(request: Request, exc: AppAPIError):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+    )
 
 
 @app.exception_handler(UserDeleted)

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ...db.config import get_async_session
@@ -7,13 +7,7 @@ from ..dependencies import current_user, optional_current_user_token
 from ..notifications import send_email_change_request
 from ..users.models import User
 from .schemas import EmailChangeConfirm, EmailChangeRequest
-from .service import (
-    EmailChangeBadToken,
-    EmailChangeEmailTaken,
-    EmailChangeSameEmail,
-    confirm_email_change,
-    request_email_change,
-)
+from .service import confirm_email_change, request_email_change
 
 router = APIRouter()
 
@@ -29,22 +23,11 @@ async def request_current_user_email_change(
     user: User = Depends(current_user),
     session: AsyncSession = Depends(get_async_session),
 ):
-    try:
-        _, token = await request_email_change(
-            session=session,
-            user=user,
-            new_email=email_change_request.new_email,
-        )
-    except EmailChangeSameEmail:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="EMAIL_CHANGE_SAME_EMAIL",
-        ) from None
-    except EmailChangeEmailTaken:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="EMAIL_CHANGE_EMAIL_TAKEN",
-        ) from None
+    _, token = await request_email_change(
+        session=session,
+        user=user,
+        new_email=email_change_request.new_email,
+    )
 
     await send_email_change_request(
         recipient_email=str(email_change_request.new_email),
@@ -66,21 +49,10 @@ async def confirm_current_user_email_change(
     session: AsyncSession = Depends(get_async_session),
     strategy=Depends(redis_backend.get_strategy),
 ):
-    try:
-        email_change = await confirm_email_change(
-            session=session,
-            token=email_change_confirm.token,
-        )
-    except EmailChangeBadToken:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="EMAIL_CHANGE_BAD_TOKEN",
-        ) from None
-    except EmailChangeEmailTaken:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="EMAIL_CHANGE_EMAIL_TAKEN",
-        ) from None
+    email_change = await confirm_email_change(
+        session=session,
+        token=email_change_confirm.token,
+    )
 
     if user_token is not None:
         user, token = user_token
