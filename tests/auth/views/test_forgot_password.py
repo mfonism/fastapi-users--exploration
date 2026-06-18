@@ -1,7 +1,13 @@
+from datetime import UTC, datetime
+
 import pytest
 
 from explore.app import app
-from tests.factories.user import build_deleted_user, build_signed_up_user
+from tests.factories.user import (
+    build_deleted_user,
+    build_plain_user,
+    build_signed_up_user,
+)
 
 
 @pytest.mark.asyncio
@@ -50,6 +56,33 @@ async def test_forgot_password_hides_deleted_user(
 
     deleted_user = build_deleted_user(email="alice@example.com")
     session.add(deleted_user)
+    await session.flush()
+
+    response = await client.post(
+        app.url_path_for("reset:forgot_password"),
+        json={"email": "alice@example.com"},
+    )
+
+    assert response.status_code == 202
+    mock_send_password_reset_request.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_forgot_password_hides_deactivated_user(
+    client,
+    mocker,
+    session,
+) -> None:
+    mock_send_password_reset_request = mocker.patch(
+        "explore.auth.users.manager.send_password_reset_request",
+        autospec=True,
+    )
+
+    deactivated_user = build_plain_user(
+        email="alice@example.com",
+        deactivated_at=datetime(2000, 10, 10, 0, 0, tzinfo=UTC),
+    )
+    session.add(deactivated_user)
     await session.flush()
 
     response = await client.post(

@@ -1,8 +1,11 @@
+from datetime import UTC, datetime
+
 import pytest
 
 from explore.app import app
 from tests.factories.user import (
     build_deleted_user,
+    build_plain_user,
     build_signed_up_user,
     build_verified_user,
 )
@@ -90,6 +93,28 @@ async def test_login_rejects_deleted_user(client, password_helper, session) -> N
     user = build_deleted_user(
         email="alice@example.com",
         hashed_password=password_helper.hash(password),
+    )
+    session.add(user)
+    await session.flush()
+
+    response = await client.post(
+        app.url_path_for("auth:redis.login"),
+        data={
+            "username": "alice@example.com",
+            "password": password,
+        },
+    )
+
+    assert response.status_code == 400
+
+
+@pytest.mark.asyncio
+async def test_login_rejects_deactivated_user(client, password_helper, session) -> None:
+    password = "strongpass123"
+    user = build_plain_user(
+        email="alice@example.com",
+        hashed_password=password_helper.hash(password),
+        deactivated_at=datetime(2000, 10, 10, 0, 0, tzinfo=UTC),
     )
     session.add(user)
     await session.flush()
