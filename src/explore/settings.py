@@ -31,6 +31,9 @@ class Settings(BaseSettings):
     verification_token_secret: SecretStr = SecretStr(
         "EXPLORE: VERIFICATION TOKEN SECRET"
     )
+    reactivation_token_secret: SecretStr = SecretStr(
+        "EXPLORE: REACTIVATION TOKEN SECRET"
+    )
 
     model_config = SettingsConfigDict(
         env_file=None,

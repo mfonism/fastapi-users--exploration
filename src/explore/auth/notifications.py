@@ -26,3 +26,13 @@ async def send_email_change_request(
 ) -> None:
     # Placeholder until an email provider is wired in.
     pass
+
+
+async def send_reactivation_request(
+    *,
+    recipient_email: str,
+    recipient_name: str,
+    token: str,
+) -> None:
+    # Placeholder until an email provider is wired in.
+    pass
