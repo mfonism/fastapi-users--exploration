@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, Response, status
 from fastapi_users import exceptions
 
 from ..users.manager import UserManager, get_user_manager
-from .schemas import ReactivationRequest
-from .service import request_reactivation
+from .schemas import ReactivationConfirm, ReactivationRequest
+from .service import confirm_reactivation, request_reactivation
 
 router = APIRouter()
 
@@ -27,3 +27,21 @@ async def request_user_reactivation(
         pass
 
     return Response(status_code=status.HTTP_202_ACCEPTED)
+
+
+@router.post(
+    "/auth/reactivate",
+    status_code=status.HTTP_204_NO_CONTENT,
+    name="auth:reactivate",
+    tags=["auth"],
+)
+async def reactivate_user(
+    reactivation_confirm: ReactivationConfirm,
+    user_manager: UserManager = Depends(get_user_manager),
+):
+    await confirm_reactivation(
+        user_manager=user_manager,
+        token=reactivation_confirm.token,
+    )
+
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
