@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Teaching Notes | Explore Teaching Library</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../index.html">Explore Teaching Library</a>
+    <nav class="top-nav" aria-label="Primary navigation">
+      <a href="index.html">Articles</a>
+      <a href="../tasks/index.html">Tasks</a>
+    </nav>
+  </header>
+  <div class="page-layout">
+    
+<aside class="sidebar">
+  <div class="sidebar-section">
+    <h2>Library</h2>
+    <ul>
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="index.html">Article Index</a></li>
+      <li><a href="../tasks/index.html">Task Index</a></li>
+    </ul>
+  </div>
+  <div class="sidebar-section">
+    <h2>Articles</h2>
+    <ol><li><a href="teaching-pack-overview.html">Teaching Pack Overview</a></li>
+<li><a href="01-project-summary.html">Project Summary</a></li>
+<li><a href="02-final-architecture.html">Final Architecture</a></li>
+<li><a href="03-infrastructure-first-setup.html">Infrastructure-First Setup</a></li>
+<li><a href="04-recommended-teaching-sequence.html">Recommended Teaching Sequence</a></li>
+<li><a href="05-parallelization-plan.html">Parallelization Plan</a></li>
+<li><a href="06-teaching-notes.html">Teaching Notes</a></li>
+<li><a href="07-risk-review.html">Risk Review</a></li>
+<li><a href="08-code-walkthrough-snippets.html">Code Walkthrough Snippets</a></li></ol>
+  </div>
+  <div class="sidebar-section">
+    <h2>Tasks</h2>
+    <ol class="task-nav"><li><a href="../tasks/001-scaffold-project.html">001: Scaffold Project</a></li>
+<li><a href="../tasks/002-add-fastapi-health-app.html">002: Add FastAPI Health App</a></li>
+<li><a href="../tasks/003-add-lint-format-tooling.html">003: Add Lint And Format Tooling</a></li>
+<li><a href="../tasks/004-add-environment-model.html">004: Add Environment Model</a></li>
+<li><a href="../tasks/005-add-settings.html">005: Add Settings</a></li>
+<li><a href="../tasks/006-add-db-session-helpers.html">006: Add DB Session Helpers</a></li>
+<li><a href="../tasks/007-initialize-alembic.html">007: Initialize Alembic</a></li>
+<li><a href="../tasks/008-add-db-commands.html">008: Add DB Commands</a></li>
+<li><a href="../tasks/009-guard-migrations.html">009: Guard Migrations</a></li>
+<li><a href="../tasks/010-add-utilities.html">010: Add Utilities</a></li>
+<li><a href="../tasks/011-add-app-errors.html">011: Add App Errors</a></li>
+<li><a href="../tasks/012-create-user-model.html">012: Create User Model</a></li>
+<li><a href="../tasks/013-add-user-factories.html">013: Add User Factories</a></li>
+<li><a href="../tasks/014-add-account-state-fields.html">014: Add Account-State Fields</a></li>
+<li><a href="../tasks/015-add-user-schemas.html">015: Add User Schemas</a></li>
+<li><a href="../tasks/016-add-user-manager.html">016: Add User Manager</a></li>
+<li><a href="../tasks/017-add-redis-auth-backend.html">017: Add Redis Auth Backend</a></li>
+<li><a href="../tasks/018-wire-generated-auth-routers.html">018: Wire Generated Auth Routers</a></li>
+<li><a href="../tasks/019-test-registration.html">019: Test Registration</a></li>
+<li><a href="../tasks/020-add-verification-flow.html">020: Add Verification Flow</a></li>
+<li><a href="../tasks/021-add-login-logout.html">021: Add Login And Logout</a></li>
+<li><a href="../tasks/022-add-current-user-endpoint.html">022: Add Current-User Endpoint</a></li>
+<li><a href="../tasks/023-add-profile-update.html">023: Add Profile Update</a></li>
+<li><a href="../tasks/024-add-deactivation.html">024: Add Deactivation</a></li>
+<li><a href="../tasks/025-add-soft-delete.html">025: Add Soft Delete</a></li>
+<li><a href="../tasks/026-add-password-reset.html">026: Add Password Reset</a></li>
+<li><a href="../tasks/027-add-change-password.html">027: Add Change Password</a></li>
+<li><a href="../tasks/028-add-reactivation-service.html">028: Add Reactivation Service</a></li>
+<li><a href="../tasks/029-add-reactivation-routes.html">029: Add Reactivation Routes</a></li>
+<li><a href="../tasks/030-add-email-change-model.html">030: Add Email-Change Model</a></li>
+<li><a href="../tasks/031-add-email-change-request-service.html">031: Add Email-Change Request Service</a></li>
+<li><a href="../tasks/032-add-email-change-request-route.html">032: Add Email-Change Request Route</a></li>
+<li><a href="../tasks/033-add-email-change-confirmation.html">033: Add Email-Change Confirmation</a></li>
+<li><a href="../tasks/034-polish-openapi.html">034: Polish OpenAPI</a></li>
+<li><a href="../tasks/035-complete-docs.html">035: Complete Docs</a></li></ol>
+  </div>
+</aside>
+
+    <main class="content">
+      <h1 id="teaching-notes">Teaching Notes</h1>
+<h2 id="setup-and-tooling">Setup And Tooling</h2>
+<p>Explain verbally:</p>
+<ul><li>why the project uses a <code>src/</code> package layout</li><li>why uv owns dependency installation and command execution</li><li>why <code>.env.example</code> is committed but <code>.env</code> is ignored</li><li>how Ruff and pre-commit keep style conversations out of code review</li></ul>
+<p>Common beginner mistakes:</p>
+<ul><li>forgetting to run <code>uv sync</code></li><li>committing <code>.env</code></li><li>running <code>python</code> directly instead of <code>uv run python</code></li><li>importing app modules before setting <code>APP_ENV=test</code> in tests</li></ul>
+<p>Checkpoint questions:</p>
+<ul><li>What file makes <code>explore</code> importable?</li><li>Where would you add a new dependency?</li><li>Why do we want a health endpoint before auth exists?</li></ul>
+<p>Optional stretch:</p>
+<ul><li>add GitHub Actions for <code>uv sync</code>, Ruff, and pytest</li></ul>
+<h2 id="settings-and-database">Settings And Database</h2>
+<p>Explain verbally:</p>
+<ul><li>settings are values that can change between environments</li><li>ORM models describe Python objects, migrations describe DB changes</li><li>async sessions are passed through dependencies instead of global variables</li><li>Alembic must import all models before reading <code>Base.metadata</code></li></ul>
+<p>Common beginner mistakes:</p>
+<ul><li>hardcoding DB URLs</li><li>forgetting to import new models in <code>db/registry.py</code></li><li>creating a model without a migration</li><li>running tests before bootstrapping the test database</li></ul>
+<p>Checkpoint questions:</p>
+<ul><li>What is the test database called when <code>DB_BASE_NAME=explore</code>?</li><li>Why does <code>get_async_session</code> yield instead of return?</li><li>What is the difference between <code>Base.metadata</code> and an Alembic revision file?</li></ul>
+<p>Optional stretch:</p>
+<ul><li>add one intentionally broken migration and practice rollback</li></ul>
+<h2 id="user-model-and-account-state">User Model And Account State</h2>
+<p>Explain verbally:</p>
+<ul><li>account state is stored as timestamps, not plain booleans</li><li>computed properties like <code>is_active</code> translate timestamps into library-friendly booleans</li><li>setters centralize state-transition timing</li><li><code>__repr__</code> must avoid sensitive data like password hashes</li></ul>
+<p>Common beginner mistakes:</p>
+<ul><li>storing raw passwords</li><li>returning internal state fields from public schemas</li><li>changing timestamps directly in route handlers</li><li>confusing deleted, deactivated, and unverified states</li></ul>
+<p>Checkpoint questions:</p>
+<ul><li>What does <code>is_active=False</code> actually write to the database?</li><li>Why might <code>deleted_at</code> be better than deleting the row?</li><li>Which fields should never appear in API responses?</li></ul>
+<p>Optional stretch:</p>
+<ul><li>extract repeated timestamp-state patterns into SQLAlchemy mixins</li></ul>
+<h2 id="fastapi-users-integration">fastapi-users Integration</h2>
+<p>Explain verbally:</p>
+<ul><li><code>fastapi-users</code> provides generated routers and manager extension points</li><li>schemas define what the API accepts and returns</li><li><code>UserManager</code> hooks are where app-specific side effects happen</li><li>Redis stores session tokens for logout/revocation</li></ul>
+<p>Common beginner mistakes:</p>
+<ul><li>trying to edit library-generated route internals</li><li>not normalizing email before lookup</li><li>forgetting that login requires verified users in this app</li><li>mocking the wrong notification function in tests</li></ul>
+<p>Checkpoint questions:</p>
+<ul><li>Which file defines the Redis token lifetime?</li><li>Which method sends verification after registration?</li><li>Why does invalid email during login still hash the submitted password?</li></ul>
+<p>Optional stretch:</p>
+<ul><li>add a second auth backend and compare behavior</li></ul>
+<h2 id="protected-routes">Protected Routes</h2>
+<p>Explain verbally:</p>
+<ul><li>dependencies can enforce authentication before route code runs</li><li>response models protect internal fields</li><li>update schemas should forbid fields users are not allowed to change</li></ul>
+<p>Common beginner mistakes:</p>
+<ul><li>trusting request bodies to identify the current user</li><li>allowing users to update <code>is_superuser</code> or <code>deleted_at</code></li><li>returning SQLAlchemy objects without response-model thought</li></ul>
+<p>Checkpoint questions:</p>
+<ul><li>Why does <code>/users/me</code> not accept a user ID?</li><li>What happens if a deleted user presents a still-valid token?</li><li>Where is <code>full_name</code> update validation enforced?</li></ul>
+<p>Optional stretch:</p>
+<ul><li>add an admin-only route and compare current-user dependencies</li></ul>
+<h2 id="password-and-recovery-workflows">Password And Recovery Workflows</h2>
+<p>Explain verbally:</p>
+<ul><li>password reset is public but token-protected</li><li>password change is authenticated and current-password-protected</li><li>generated router flows and custom route flows can coexist</li></ul>
+<p>Common beginner mistakes:</p>
+<ul><li>leaking whether an email exists</li><li>forgetting <code>writeOnly</code> on password fields</li><li>updating a password without verifying the old one</li></ul>
+<p>Checkpoint questions:</p>
+<ul><li>Why does change-password require authentication but reset-password does not?</li><li>What response should the API return for an accepted empty command?</li><li>Where is the password hash created?</li></ul>
+<p>Optional stretch:</p>
+<ul><li>add password strength validation and tests</li></ul>
+<h2 id="reactivation-and-email-change">Reactivation And Email Change</h2>
+<p>Explain verbally:</p>
+<ul><li>reactivation tokens include state so old tokens become stale</li><li>email-change tokens are stored hashed, not raw</li><li>request endpoints should avoid user enumeration</li><li>confirmation endpoints need expiry, cancellation, reuse, and race checks</li></ul>
+<p>Common beginner mistakes:</p>
+<ul><li>storing raw confirmation tokens</li><li>forgetting expiry checks</li><li>not cancelling older email-change requests</li><li>confirming email change for deleted or inactive users</li></ul>
+<p>Checkpoint questions:</p>
+<ul><li>Why does a reactivation token include <code>deactivated_at</code>?</li><li>What makes an email-change token unusable?</li><li>Why should requesting reactivation always return 202?</li></ul>
+<p>Optional stretch:</p>
+<ul><li>wire a real email provider behind <code>notifications.py</code></li></ul>
+<h2 id="tests">Tests</h2>
+<p>Explain verbally:</p>
+<ul><li>unit-like model tests are faster and simpler than endpoint tests</li><li>endpoint tests exercise dependency wiring and response contracts</li><li>the async client can call the app in-process</li><li>transaction fixtures isolate database state between tests</li></ul>
+<p>Common beginner mistakes:</p>
+<ul><li>not awaiting async client calls</li><li>forgetting to flush before reading generated IDs</li><li>sharing mutable client headers across tests unintentionally</li><li>not clearing dependency overrides</li></ul>
+<p>Checkpoint questions:</p>
+<ul><li>Which fixture creates an authenticated request?</li><li>Why do tests patch notification functions?</li><li>What does the nested transaction fixture protect?</li></ul>
+<p>Optional stretch:</p>
+<ul><li>add coverage measurement and require coverage for new tasks</li></ul>
+      <nav class="pager"><a href="05-parallelization-plan.html">Previous: Parallelization Plan</a><span></span><a href="07-risk-review.html">Next: Risk Review</a></nav>
+    </main>
+  </div>
+</body>
+</html>

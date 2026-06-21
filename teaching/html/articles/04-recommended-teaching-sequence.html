@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Recommended Teaching Sequence | Explore Teaching Library</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../index.html">Explore Teaching Library</a>
+    <nav class="top-nav" aria-label="Primary navigation">
+      <a href="index.html">Articles</a>
+      <a href="../tasks/index.html">Tasks</a>
+    </nav>
+  </header>
+  <div class="page-layout">
+    
+<aside class="sidebar">
+  <div class="sidebar-section">
+    <h2>Library</h2>
+    <ul>
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="index.html">Article Index</a></li>
+      <li><a href="../tasks/index.html">Task Index</a></li>
+    </ul>
+  </div>
+  <div class="sidebar-section">
+    <h2>Articles</h2>
+    <ol><li><a href="teaching-pack-overview.html">Teaching Pack Overview</a></li>
+<li><a href="01-project-summary.html">Project Summary</a></li>
+<li><a href="02-final-architecture.html">Final Architecture</a></li>
+<li><a href="03-infrastructure-first-setup.html">Infrastructure-First Setup</a></li>
+<li><a href="04-recommended-teaching-sequence.html">Recommended Teaching Sequence</a></li>
+<li><a href="05-parallelization-plan.html">Parallelization Plan</a></li>
+<li><a href="06-teaching-notes.html">Teaching Notes</a></li>
+<li><a href="07-risk-review.html">Risk Review</a></li>
+<li><a href="08-code-walkthrough-snippets.html">Code Walkthrough Snippets</a></li></ol>
+  </div>
+  <div class="sidebar-section">
+    <h2>Tasks</h2>
+    <ol class="task-nav"><li><a href="../tasks/001-scaffold-project.html">001: Scaffold Project</a></li>
+<li><a href="../tasks/002-add-fastapi-health-app.html">002: Add FastAPI Health App</a></li>
+<li><a href="../tasks/003-add-lint-format-tooling.html">003: Add Lint And Format Tooling</a></li>
+<li><a href="../tasks/004-add-environment-model.html">004: Add Environment Model</a></li>
+<li><a href="../tasks/005-add-settings.html">005: Add Settings</a></li>
+<li><a href="../tasks/006-add-db-session-helpers.html">006: Add DB Session Helpers</a></li>
+<li><a href="../tasks/007-initialize-alembic.html">007: Initialize Alembic</a></li>
+<li><a href="../tasks/008-add-db-commands.html">008: Add DB Commands</a></li>
+<li><a href="../tasks/009-guard-migrations.html">009: Guard Migrations</a></li>
+<li><a href="../tasks/010-add-utilities.html">010: Add Utilities</a></li>
+<li><a href="../tasks/011-add-app-errors.html">011: Add App Errors</a></li>
+<li><a href="../tasks/012-create-user-model.html">012: Create User Model</a></li>
+<li><a href="../tasks/013-add-user-factories.html">013: Add User Factories</a></li>
+<li><a href="../tasks/014-add-account-state-fields.html">014: Add Account-State Fields</a></li>
+<li><a href="../tasks/015-add-user-schemas.html">015: Add User Schemas</a></li>
+<li><a href="../tasks/016-add-user-manager.html">016: Add User Manager</a></li>
+<li><a href="../tasks/017-add-redis-auth-backend.html">017: Add Redis Auth Backend</a></li>
+<li><a href="../tasks/018-wire-generated-auth-routers.html">018: Wire Generated Auth Routers</a></li>
+<li><a href="../tasks/019-test-registration.html">019: Test Registration</a></li>
+<li><a href="../tasks/020-add-verification-flow.html">020: Add Verification Flow</a></li>
+<li><a href="../tasks/021-add-login-logout.html">021: Add Login And Logout</a></li>
+<li><a href="../tasks/022-add-current-user-endpoint.html">022: Add Current-User Endpoint</a></li>
+<li><a href="../tasks/023-add-profile-update.html">023: Add Profile Update</a></li>
+<li><a href="../tasks/024-add-deactivation.html">024: Add Deactivation</a></li>
+<li><a href="../tasks/025-add-soft-delete.html">025: Add Soft Delete</a></li>
+<li><a href="../tasks/026-add-password-reset.html">026: Add Password Reset</a></li>
+<li><a href="../tasks/027-add-change-password.html">027: Add Change Password</a></li>
+<li><a href="../tasks/028-add-reactivation-service.html">028: Add Reactivation Service</a></li>
+<li><a href="../tasks/029-add-reactivation-routes.html">029: Add Reactivation Routes</a></li>
+<li><a href="../tasks/030-add-email-change-model.html">030: Add Email-Change Model</a></li>
+<li><a href="../tasks/031-add-email-change-request-service.html">031: Add Email-Change Request Service</a></li>
+<li><a href="../tasks/032-add-email-change-request-route.html">032: Add Email-Change Request Route</a></li>
+<li><a href="../tasks/033-add-email-change-confirmation.html">033: Add Email-Change Confirmation</a></li>
+<li><a href="../tasks/034-polish-openapi.html">034: Polish OpenAPI</a></li>
+<li><a href="../tasks/035-complete-docs.html">035: Complete Docs</a></li></ol>
+  </div>
+</aside>
+
+    <main class="content">
+      <h1 id="recommended-teaching-sequence">Recommended Teaching Sequence</h1>
+<p>This sequence rebuilds the project from zero. Each task is small enough to map to one tutorial commit or one task-management card.</p>
+<p>Detailed task cards live in <a href="../tasks/index.html">tasks</a>.</p>
+<h2 id="full-sequence">Full Sequence</h2>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Title</th><th>Learning Goal</th><th>Files Created/Modified</th><th>Objective</th><th>Commit</th><th>Difficulty</th><th>Depends</th><th>Parallel</th></tr></thead><tbody><tr><td>1</td><td>Scaffold project</td><td>Python package layout</td><td><code>.python-version</code>, <code>.gitignore</code>, <code>pyproject.toml</code>, <code>README.md</code>, <code>src/explore/__init__.py</code></td><td>Create uv project metadata and importable package.</td><td><code>chore: scaffold python package</code></td><td>beginner</td><td>none</td><td>no</td></tr><tr><td>2</td><td>Add FastAPI health app</td><td>Minimal API</td><td><code>src/explore/app.py</code>, <code>pyproject.toml</code>, <code>uv.lock</code></td><td>Install FastAPI, create app, add <code>/health</code>.</td><td><code>feat: add FastAPI health endpoint</code></td><td>beginner</td><td>1</td><td>no</td></tr><tr><td>3</td><td>Add lint/format tooling</td><td>Quality loop</td><td><code>pyproject.toml</code>, <code>.pre-commit-config.yaml</code></td><td>Configure Ruff and pre-commit.</td><td><code>chore: configure ruff and pre-commit</code></td><td>beginner</td><td>1</td><td>no</td></tr><tr><td>4</td><td>Add environment model</td><td>Config basics</td><td><code>src/explore/env.py</code></td><td>Define environments, aliases, env-file resolution.</td><td><code>feat: add app environment helpers</code></td><td>beginner</td><td>1</td><td>no</td></tr><tr><td>5</td><td>Add settings</td><td>Pydantic settings</td><td><code>src/explore/settings.py</code>, <code>.env.example</code>, <code>tests/test_settings.py</code></td><td>Load DB, Redis, secrets, debug flags.</td><td><code>feat: load settings from environment</code></td><td>beginner</td><td>4</td><td>no</td></tr><tr><td>6</td><td>Add DB session helpers</td><td>Async SQLAlchemy</td><td><code>src/explore/db/base.py</code>, <code>src/explore/db/config.py</code></td><td>Create async engine/sessionmaker.</td><td><code>feat: configure async database sessions</code></td><td>intermediate</td><td>5</td><td>no</td></tr><tr><td>7</td><td>Initialize Alembic</td><td>Migrations</td><td><code>alembic.ini</code>, <code>alembic/env.py</code>, <code>alembic/script.py.mako</code>, <code>src/explore/db/registry.py</code></td><td>Connect Alembic to settings and metadata.</td><td><code>chore: initialize alembic</code></td><td>intermediate</td><td>6</td><td>no</td></tr><tr><td>8</td><td>Add DB commands</td><td>Developer workflow</td><td><code>src/explore/db/bootstrap.py</code>, <code>src/explore/db/migrate.py</code>, <code>src/explore/console.py</code>, <code>pyproject.toml</code></td><td>Add bootstrap, upgrade, downgrade commands.</td><td><code>chore: add database management commands</code></td><td>stretch</td><td>7</td><td>no</td></tr><tr><td>9</td><td>Guard migrations</td><td>Tooling safety</td><td><code>scripts/check_empty_migrations.py</code>, <code>.pre-commit-config.yaml</code></td><td>Fail on empty Alembic revisions.</td><td><code>chore: guard against empty migrations</code></td><td>intermediate</td><td>7</td><td>no</td></tr><tr><td>10</td><td>Add utilities</td><td>Shared helpers</td><td><code>src/explore/utils/email.py</code>, <code>src/explore/utils/clock.py</code>, <code>tests/utils/test_email.py</code></td><td>Normalize emails and centralize UTC time.</td><td><code>feat: add email and clock utilities</code></td><td>beginner</td><td>5</td><td>no</td></tr><tr><td>11</td><td>Add app errors</td><td>Error handling</td><td><code>src/explore/exceptions.py</code>, <code>src/explore/auth/exceptions.py</code>, <code>src/explore/app.py</code></td><td>Map app errors to JSON responses.</td><td><code>feat: add API error handling</code></td><td>beginner</td><td>2</td><td>no</td></tr><tr><td>12</td><td>Create user model</td><td>ORM modeling</td><td><code>src/explore/auth/users/models.py</code>, <code>src/explore/db/registry.py</code>, first migration</td><td>Add base user table.</td><td><code>feat: add user model and initial migration</code></td><td>intermediate</td><td>7</td><td>no</td></tr><tr><td>13</td><td>Add user factories</td><td>Test data</td><td><code>tests/factories/user.py</code>, <code>tests/factories/test_user.py</code></td><td>Create reusable user builders.</td><td><code>test: add user factories</code></td><td>beginner</td><td>12</td><td>no</td></tr><tr><td>14</td><td>Add account-state fields</td><td>Domain modeling</td><td><code>users/models.py</code>, migrations, <code>tests/auth/models/test_user.py</code></td><td>Add timestamps and computed state properties.</td><td><code>feat: model user account states</code></td><td>intermediate</td><td>10, 12</td><td>no</td></tr><tr><td>15</td><td>Add user schemas</td><td>API contracts</td><td><code>auth/users/schemas.py</code></td><td>Define create/read/update schemas.</td><td><code>feat: add user API schemas</code></td><td>beginner</td><td>14</td><td>no</td></tr><tr><td>16</td><td>Add user manager</td><td>Library integration</td><td><code>auth/users/manager.py</code>, <code>auth/notifications.py</code></td><td>Connect SQLAlchemy user DB and manager hooks.</td><td><code>feat: add user manager</code></td><td>intermediate</td><td>11, 15</td><td>no</td></tr><tr><td>17</td><td>Add Redis auth backend</td><td>Token strategy</td><td><code>auth/backends/redis.py</code>, <code>settings.py</code>, <code>.env.example</code></td><td>Configure bearer transport and Redis strategy.</td><td><code>feat: add Redis auth backend</code></td><td>intermediate</td><td>16</td><td>no</td></tr><tr><td>18</td><td>Wire generated auth routers</td><td>Router composition</td><td><code>auth/routes.py</code>, <code>app.py</code></td><td>Add register, reset-password, verify routers.</td><td><code>feat: wire generated auth routers</code></td><td>intermediate</td><td>17</td><td>no</td></tr><tr><td>19</td><td>Test registration</td><td>Full feature test</td><td><code>tests/auth/views/test_register.py</code></td><td>Verify registration behavior and validation.</td><td><code>test: cover user registration</code></td><td>beginner</td><td>13, 18</td><td>no</td></tr><tr><td>20</td><td>Add verification flow</td><td>Token workflow</td><td><code>manager.py</code>, <code>auth/routes.py</code>, verification tests</td><td>Request and confirm email verification.</td><td><code>feat: add email verification workflow</code></td><td>intermediate</td><td>18, 19</td><td>no</td></tr><tr><td>21</td><td>Add login/logout</td><td>Auth session lifecycle</td><td><code>auth/sessions/routes.py</code>, <code>manager.py</code>, login/logout tests</td><td>Login verified users, revoke tokens, track login time.</td><td><code>feat: add verified login and logout</code></td><td>intermediate</td><td>20</td><td>no</td></tr><tr><td>22</td><td>Add current-user endpoint</td><td>Protected routes</td><td><code>auth/dependencies.py</code>, <code>users/routes.py</code>, current-user tests</td><td>Implement authenticated <code>/users/me</code>.</td><td><code>feat: add current user endpoint</code></td><td>beginner</td><td>21</td><td>no</td></tr><tr><td>23</td><td>Add profile update</td><td>Request validation</td><td><code>users/schemas.py</code>, <code>users/routes.py</code>, patch tests</td><td>Allow <code>full_name</code> updates only.</td><td><code>feat: add current user profile updates</code></td><td>beginner</td><td>22</td><td>yes</td></tr><tr><td>24</td><td>Add deactivation</td><td>Account lifecycle</td><td><code>users/routes.py</code>, <code>models.py</code>, deactivate tests</td><td>Mark current user inactive.</td><td><code>feat: add account deactivation</code></td><td>beginner</td><td>22</td><td>yes</td></tr><tr><td>25</td><td>Add soft delete</td><td>Authorization edge cases</td><td><code>users/routes.py</code>, <code>dependencies.py</code>, <code>manager.py</code>, <code>app.py</code>, delete tests</td><td>Soft delete user and revoke current session.</td><td><code>feat: add soft deletion</code></td><td>intermediate</td><td>22</td><td>yes</td></tr><tr><td>26</td><td>Add password reset</td><td>Generated flow customization</td><td><code>manager.py</code>, <code>auth/routes.py</code>, password reset tests</td><td>Send and confirm reset-password tokens.</td><td><code>feat: add password reset workflow</code></td><td>intermediate</td><td>21, 24, 25</td><td>yes</td></tr><tr><td>27</td><td>Add change password</td><td>Custom command endpoint</td><td><code>passwords/*</code>, change-password tests</td><td>Verify current password and set a new one.</td><td><code>feat: add password change endpoint</code></td><td>beginner</td><td>22</td><td>yes</td></tr><tr><td>28</td><td>Add reactivation service</td><td>JWT business rules</td><td><code>reactivation/schemas.py</code>, <code>exceptions.py</code>, <code>service.py</code></td><td>Generate and validate reactivation tokens.</td><td><code>feat: add reactivation token service</code></td><td>stretch</td><td>24</td><td>yes</td></tr><tr><td>29</td><td>Add reactivation routes</td><td>Public recovery flow</td><td><code>reactivation/routes.py</code>, <code>auth/routes.py</code>, reactivation tests</td><td>Request and confirm reactivation.</td><td><code>feat: add account reactivation endpoints</code></td><td>intermediate</td><td>25, 28</td><td>yes</td></tr><tr><td>30</td><td>Add email-change model</td><td>Secondary resource</td><td><code>email_changes/models.py</code>, migration, model tests</td><td>Store email-change token state.</td><td><code>feat: add email change model</code></td><td>intermediate</td><td>14</td><td>yes</td></tr><tr><td>31</td><td>Add email-change request service</td><td>Service-layer rules</td><td><code>email_changes/service.py</code>, <code>exceptions.py</code></td><td>Create request token and reject invalid new emails.</td><td><code>feat: request email changes</code></td><td>intermediate</td><td>30</td><td>yes</td></tr><tr><td>32</td><td>Add email-change request route</td><td>Authenticated command</td><td><code>email_changes/routes.py</code>, <code>schemas.py</code>, request tests</td><td>Authenticated user requests new email.</td><td><code>feat: add email change request endpoint</code></td><td>beginner</td><td>22, 31</td><td>yes</td></tr><tr><td>33</td><td>Add email-change confirmation</td><td>Token confirmation</td><td><code>email_changes/service.py</code>, <code>routes.py</code>, confirmation tests</td><td>Confirm token and update email safely.</td><td><code>feat: confirm email changes</code></td><td>stretch</td><td>25, 32</td><td>yes</td></tr><tr><td>34</td><td>Polish OpenAPI</td><td>API documentation</td><td><code>tests/auth/views/test_openapi.py</code>, schemas/routes</td><td>Assert write-only password fields and empty responses.</td><td><code>test: document auth OpenAPI responses</code></td><td>beginner</td><td>18, 27, 29, 33</td><td>yes</td></tr><tr><td>35</td><td>Complete docs</td><td>Workshop runbook</td><td><code>README.md</code></td><td>Document setup, workflow, commands, and future plans.</td><td><code>docs: complete local workflow guide</code></td><td>beginner</td><td>all</td><td>yes</td></tr></tbody></table></div>
+<h2 id="suggested-commit-style">Suggested Commit Style</h2>
+<p>Use conventional-style commits:</p>
+<ul><li><code>chore:</code> for setup, tooling, and maintenance commands</li><li><code>feat:</code> for behavior students can observe</li><li><code>test:</code> for explicit test-focused commits</li><li><code>docs:</code> for workshop and local workflow documentation</li></ul>
+<p>Keep one learning goal per commit. If a task creates too much code for a live segment, split it into &quot;model&quot;, &quot;route&quot;, &quot;test&quot;, and &quot;edge cases&quot;.</p>
+      <nav class="pager"><a href="03-infrastructure-first-setup.html">Previous: Infrastructure-First Setup</a><span></span><a href="05-parallelization-plan.html">Next: Parallelization Plan</a></nav>
+    </main>
+  </div>
+</body>
+</html>

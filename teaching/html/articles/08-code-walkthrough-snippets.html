@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Code Walkthrough Snippets | Explore Teaching Library</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../index.html">Explore Teaching Library</a>
+    <nav class="top-nav" aria-label="Primary navigation">
+      <a href="index.html">Articles</a>
+      <a href="../tasks/index.html">Tasks</a>
+    </nav>
+  </header>
+  <div class="page-layout">
+    
+<aside class="sidebar">
+  <div class="sidebar-section">
+    <h2>Library</h2>
+    <ul>
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="index.html">Article Index</a></li>
+      <li><a href="../tasks/index.html">Task Index</a></li>
+    </ul>
+  </div>
+  <div class="sidebar-section">
+    <h2>Articles</h2>
+    <ol><li><a href="teaching-pack-overview.html">Teaching Pack Overview</a></li>
+<li><a href="01-project-summary.html">Project Summary</a></li>
+<li><a href="02-final-architecture.html">Final Architecture</a></li>
+<li><a href="03-infrastructure-first-setup.html">Infrastructure-First Setup</a></li>
+<li><a href="04-recommended-teaching-sequence.html">Recommended Teaching Sequence</a></li>
+<li><a href="05-parallelization-plan.html">Parallelization Plan</a></li>
+<li><a href="06-teaching-notes.html">Teaching Notes</a></li>
+<li><a href="07-risk-review.html">Risk Review</a></li>
+<li><a href="08-code-walkthrough-snippets.html">Code Walkthrough Snippets</a></li></ol>
+  </div>
+  <div class="sidebar-section">
+    <h2>Tasks</h2>
+    <ol class="task-nav"><li><a href="../tasks/001-scaffold-project.html">001: Scaffold Project</a></li>
+<li><a href="../tasks/002-add-fastapi-health-app.html">002: Add FastAPI Health App</a></li>
+<li><a href="../tasks/003-add-lint-format-tooling.html">003: Add Lint And Format Tooling</a></li>
+<li><a href="../tasks/004-add-environment-model.html">004: Add Environment Model</a></li>
+<li><a href="../tasks/005-add-settings.html">005: Add Settings</a></li>
+<li><a href="../tasks/006-add-db-session-helpers.html">006: Add DB Session Helpers</a></li>
+<li><a href="../tasks/007-initialize-alembic.html">007: Initialize Alembic</a></li>
+<li><a href="../tasks/008-add-db-commands.html">008: Add DB Commands</a></li>
+<li><a href="../tasks/009-guard-migrations.html">009: Guard Migrations</a></li>
+<li><a href="../tasks/010-add-utilities.html">010: Add Utilities</a></li>
+<li><a href="../tasks/011-add-app-errors.html">011: Add App Errors</a></li>
+<li><a href="../tasks/012-create-user-model.html">012: Create User Model</a></li>
+<li><a href="../tasks/013-add-user-factories.html">013: Add User Factories</a></li>
+<li><a href="../tasks/014-add-account-state-fields.html">014: Add Account-State Fields</a></li>
+<li><a href="../tasks/015-add-user-schemas.html">015: Add User Schemas</a></li>
+<li><a href="../tasks/016-add-user-manager.html">016: Add User Manager</a></li>
+<li><a href="../tasks/017-add-redis-auth-backend.html">017: Add Redis Auth Backend</a></li>
+<li><a href="../tasks/018-wire-generated-auth-routers.html">018: Wire Generated Auth Routers</a></li>
+<li><a href="../tasks/019-test-registration.html">019: Test Registration</a></li>
+<li><a href="../tasks/020-add-verification-flow.html">020: Add Verification Flow</a></li>
+<li><a href="../tasks/021-add-login-logout.html">021: Add Login And Logout</a></li>
+<li><a href="../tasks/022-add-current-user-endpoint.html">022: Add Current-User Endpoint</a></li>
+<li><a href="../tasks/023-add-profile-update.html">023: Add Profile Update</a></li>
+<li><a href="../tasks/024-add-deactivation.html">024: Add Deactivation</a></li>
+<li><a href="../tasks/025-add-soft-delete.html">025: Add Soft Delete</a></li>
+<li><a href="../tasks/026-add-password-reset.html">026: Add Password Reset</a></li>
+<li><a href="../tasks/027-add-change-password.html">027: Add Change Password</a></li>
+<li><a href="../tasks/028-add-reactivation-service.html">028: Add Reactivation Service</a></li>
+<li><a href="../tasks/029-add-reactivation-routes.html">029: Add Reactivation Routes</a></li>
+<li><a href="../tasks/030-add-email-change-model.html">030: Add Email-Change Model</a></li>
+<li><a href="../tasks/031-add-email-change-request-service.html">031: Add Email-Change Request Service</a></li>
+<li><a href="../tasks/032-add-email-change-request-route.html">032: Add Email-Change Request Route</a></li>
+<li><a href="../tasks/033-add-email-change-confirmation.html">033: Add Email-Change Confirmation</a></li>
+<li><a href="../tasks/034-polish-openapi.html">034: Polish OpenAPI</a></li>
+<li><a href="../tasks/035-complete-docs.html">035: Complete Docs</a></li></ol>
+  </div>
+</aside>
+
+    <main class="content">
+      <h1 id="code-walkthrough-snippets">Code Walkthrough Snippets</h1>
+<p>These snippets are not a replacement for the task files. They are short teaching anchors for live coding.</p>
+<h2 id="minimal-fastapi-app">Minimal FastAPI App</h2>
+<pre><code class="language-python">from fastapi import FastAPI
+
+app = FastAPI()
+
+
+@app.get(&quot;/health&quot;)
+def health():
+    return {&quot;status&quot;: &quot;ok&quot;}</code></pre>
+<p>Teaching point: start with a route that has no database, no auth, and no external services.</p>
+<h2 id="environment-enum">Environment Enum</h2>
+<pre><code class="language-python">from enum import StrEnum
+
+
+class AppEnv(StrEnum):
+    LOCAL = &quot;local&quot;
+    TEST = &quot;test&quot;
+    STAGING = &quot;staging&quot;
+    PRODUCTION = &quot;production&quot;</code></pre>
+<p>Teaching point: use explicit names for deployment modes instead of scattering string literals through the app.</p>
+<h2 id="settings-shape">Settings Shape</h2>
+<pre><code class="language-python">from pydantic import SecretStr
+from pydantic_settings import BaseSettings
+
+
+class Settings(BaseSettings):
+    app_env: AppEnv = AppEnv.LOCAL
+    db_host: str = &quot;localhost&quot;
+    db_port: int = 5432
+    db_user: str = &quot;postgres&quot;
+    db_password: SecretStr = SecretStr(&quot;postgres&quot;)
+    db_base_name: str = &quot;explore&quot;
+
+    @property
+    def database_name(self) -&gt; str:
+        if self.app_env == AppEnv.TEST:
+            return f&quot;{self.db_base_name}_test&quot;
+        return self.db_base_name</code></pre>
+<p>Teaching point: keep config loading separate from feature logic.</p>
+<h2 id="async-session-dependency">Async Session Dependency</h2>
+<pre><code class="language-python">from collections.abc import AsyncGenerator
+
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+
+
+async def get_async_session() -&gt; AsyncGenerator[AsyncSession, None]:
+    async_session_maker = get_async_session_maker()
+
+    async with async_session_maker() as session:
+        yield session</code></pre>
+<p>Teaching point: route code should ask FastAPI for a session instead of creating one manually.</p>
+<h2 id="timestamp-backed-account-state">Timestamp-Backed Account State</h2>
+<pre><code class="language-python">from datetime import datetime
+
+from sqlalchemy import DateTime
+from sqlalchemy.orm import Mapped, mapped_column
+
+from ...utils import clock
+
+
+class User(Base):
+    deactivated_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
+    @property
+    def is_active(self) -&gt; bool:
+        return self.deactivated_at is None
+
+    @is_active.setter
+    def is_active(self, value: bool) -&gt; None:
+        if value == self.is_active:
+            return
+
+        self.deactivated_at = None if value else clock.utcnow()</code></pre>
+<p>Teaching point: the API can expose a simple boolean while the database keeps the audit timestamp.</p>
+<h2 id="route-and-service-split">Route And Service Split</h2>
+<pre><code class="language-python">@router.post(&quot;/auth/change-password&quot;, status_code=status.HTTP_204_NO_CONTENT)
+async def change_password(
+    password_change: PasswordChange,
+    user: User = Depends(current_user),
+    user_manager: UserManager = Depends(get_user_manager),
+):
+    await change_user_password(
+        user=user,
+        user_manager=user_manager,
+        current_password=password_change.current_password,
+        new_password=password_change.new_password,
+    )
+    return Response(status_code=status.HTTP_204_NO_CONTENT)</code></pre>
+<pre><code class="language-python">async def change_user_password(
+    *,
+    user: User,
+    user_manager: UserManager,
+    current_password: str,
+    new_password: str,
+) -&gt; None:
+    password_verified, _ = user_manager.password_helper.verify_and_update(
+        current_password,
+        user.hashed_password,
+    )
+    if not password_verified:
+        raise ChangePasswordBadPassword()
+
+    await user_manager._update(user, {&quot;password&quot;: new_password})</code></pre>
+<p>Teaching point: route functions handle HTTP and dependencies; service functions hold business rules.</p>
+<h2 id="token-hashing-for-email-changes">Token Hashing For Email Changes</h2>
+<pre><code class="language-python">import hashlib
+import secrets
+
+EMAIL_CHANGE_TOKEN_BYTES = 32
+
+
+def generate_email_change_token() -&gt; str:
+    return secrets.token_urlsafe(EMAIL_CHANGE_TOKEN_BYTES)
+
+
+def hash_email_change_token(token: str) -&gt; str:
+    return hashlib.sha256(token.encode()).hexdigest()</code></pre>
+<p>Teaching point: store enough information to verify a token, but do not store the raw token.</p>
+<h2 id="endpoint-test-pattern">Endpoint Test Pattern</h2>
+<pre><code class="language-python">@pytest.mark.asyncio
+async def test_get_current_user_returns_authenticated_user(
+    client,
+    authenticate_as,
+    session,
+) -&gt; None:
+    user = build_verified_user(email=&quot;alice@example.com&quot;)
+    session.add(user)
+    await session.flush()
+
+    await authenticate_as(client, user)
+    response = await client.get(app.url_path_for(&quot;users:current_user&quot;))
+
+    assert response.status_code == 200
+    assert response.json()[&quot;email&quot;] == &quot;alice@example.com&quot;</code></pre>
+<p>Teaching point: tests should set up one clear state, perform one request, and assert the behavior that matters.</p>
+      <nav class="pager"><a href="07-risk-review.html">Previous: Risk Review</a><span></span><a href="../tasks/index.html">Next: Task Index</a></nav>
+    </main>
+  </div>
+</body>
+</html>

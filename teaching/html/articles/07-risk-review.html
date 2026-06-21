@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Risk Review | Explore Teaching Library</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../index.html">Explore Teaching Library</a>
+    <nav class="top-nav" aria-label="Primary navigation">
+      <a href="index.html">Articles</a>
+      <a href="../tasks/index.html">Tasks</a>
+    </nav>
+  </header>
+  <div class="page-layout">
+    
+<aside class="sidebar">
+  <div class="sidebar-section">
+    <h2>Library</h2>
+    <ul>
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="index.html">Article Index</a></li>
+      <li><a href="../tasks/index.html">Task Index</a></li>
+    </ul>
+  </div>
+  <div class="sidebar-section">
+    <h2>Articles</h2>
+    <ol><li><a href="teaching-pack-overview.html">Teaching Pack Overview</a></li>
+<li><a href="01-project-summary.html">Project Summary</a></li>
+<li><a href="02-final-architecture.html">Final Architecture</a></li>
+<li><a href="03-infrastructure-first-setup.html">Infrastructure-First Setup</a></li>
+<li><a href="04-recommended-teaching-sequence.html">Recommended Teaching Sequence</a></li>
+<li><a href="05-parallelization-plan.html">Parallelization Plan</a></li>
+<li><a href="06-teaching-notes.html">Teaching Notes</a></li>
+<li><a href="07-risk-review.html">Risk Review</a></li>
+<li><a href="08-code-walkthrough-snippets.html">Code Walkthrough Snippets</a></li></ol>
+  </div>
+  <div class="sidebar-section">
+    <h2>Tasks</h2>
+    <ol class="task-nav"><li><a href="../tasks/001-scaffold-project.html">001: Scaffold Project</a></li>
+<li><a href="../tasks/002-add-fastapi-health-app.html">002: Add FastAPI Health App</a></li>
+<li><a href="../tasks/003-add-lint-format-tooling.html">003: Add Lint And Format Tooling</a></li>
+<li><a href="../tasks/004-add-environment-model.html">004: Add Environment Model</a></li>
+<li><a href="../tasks/005-add-settings.html">005: Add Settings</a></li>
+<li><a href="../tasks/006-add-db-session-helpers.html">006: Add DB Session Helpers</a></li>
+<li><a href="../tasks/007-initialize-alembic.html">007: Initialize Alembic</a></li>
+<li><a href="../tasks/008-add-db-commands.html">008: Add DB Commands</a></li>
+<li><a href="../tasks/009-guard-migrations.html">009: Guard Migrations</a></li>
+<li><a href="../tasks/010-add-utilities.html">010: Add Utilities</a></li>
+<li><a href="../tasks/011-add-app-errors.html">011: Add App Errors</a></li>
+<li><a href="../tasks/012-create-user-model.html">012: Create User Model</a></li>
+<li><a href="../tasks/013-add-user-factories.html">013: Add User Factories</a></li>
+<li><a href="../tasks/014-add-account-state-fields.html">014: Add Account-State Fields</a></li>
+<li><a href="../tasks/015-add-user-schemas.html">015: Add User Schemas</a></li>
+<li><a href="../tasks/016-add-user-manager.html">016: Add User Manager</a></li>
+<li><a href="../tasks/017-add-redis-auth-backend.html">017: Add Redis Auth Backend</a></li>
+<li><a href="../tasks/018-wire-generated-auth-routers.html">018: Wire Generated Auth Routers</a></li>
+<li><a href="../tasks/019-test-registration.html">019: Test Registration</a></li>
+<li><a href="../tasks/020-add-verification-flow.html">020: Add Verification Flow</a></li>
+<li><a href="../tasks/021-add-login-logout.html">021: Add Login And Logout</a></li>
+<li><a href="../tasks/022-add-current-user-endpoint.html">022: Add Current-User Endpoint</a></li>
+<li><a href="../tasks/023-add-profile-update.html">023: Add Profile Update</a></li>
+<li><a href="../tasks/024-add-deactivation.html">024: Add Deactivation</a></li>
+<li><a href="../tasks/025-add-soft-delete.html">025: Add Soft Delete</a></li>
+<li><a href="../tasks/026-add-password-reset.html">026: Add Password Reset</a></li>
+<li><a href="../tasks/027-add-change-password.html">027: Add Change Password</a></li>
+<li><a href="../tasks/028-add-reactivation-service.html">028: Add Reactivation Service</a></li>
+<li><a href="../tasks/029-add-reactivation-routes.html">029: Add Reactivation Routes</a></li>
+<li><a href="../tasks/030-add-email-change-model.html">030: Add Email-Change Model</a></li>
+<li><a href="../tasks/031-add-email-change-request-service.html">031: Add Email-Change Request Service</a></li>
+<li><a href="../tasks/032-add-email-change-request-route.html">032: Add Email-Change Request Route</a></li>
+<li><a href="../tasks/033-add-email-change-confirmation.html">033: Add Email-Change Confirmation</a></li>
+<li><a href="../tasks/034-polish-openapi.html">034: Polish OpenAPI</a></li>
+<li><a href="../tasks/035-complete-docs.html">035: Complete Docs</a></li></ol>
+  </div>
+</aside>
+
+    <main class="content">
+      <h1 id="risk-review">Risk Review</h1>
+<p>Some final-codebase pieces are useful in a real project but too complex to teach too early. Use this review to decide what to simplify, defer, or provide as starter code.</p>
+<div class="table-wrap"><table><thead><tr><th>Area</th><th>Risk For Beginners</th><th>Recommendation</th></tr></thead><tbody><tr><td><code>fastapi-users</code> generated routers</td><td>Students may feel behavior appears by magic.</td><td>Teach one generated route first, then show the manager/schema/backend hooks that customize it.</td></tr><tr><td>Generic types in <code>FastAPIUsers[User, uuid.UUID]</code> and <code>BaseUserManager[User, uuid.UUID]</code></td><td>Type syntax may distract from auth flow.</td><td>Explain as &quot;the library needs to know our user type and ID type&quot;; defer deeper generics discussion.</td></tr><tr><td>Async SQLAlchemy sessions</td><td>Async context managers, dependency yields, and session lifetimes are several concepts at once.</td><td>Provide the session helper early and revisit it during tests.</td></tr><tr><td>Transactional test fixture with nested savepoints</td><td>Correct but advanced.</td><td>Provide as starter code in a workshop, then explain why tests stay isolated.</td></tr><tr><td>PostgreSQL role/database bootstrap</td><td>Operational detail can consume class time.</td><td>Hide behind <code>uv run db-bootstrap</code>; only teach migrations directly.</td></tr><tr><td>PostgreSQL version check and <code>uuidv7()</code> server defaults</td><td>Environment-specific and can fail on student machines.</td><td>Use a provided Docker command or replace with simpler UUID defaults in a beginner-only variant.</td></tr><tr><td>Redis token strategy</td><td>Requires another service and auth vocabulary.</td><td>Draw the login/logout flow. Students do not need to inspect Redis internals.</td></tr><tr><td>Password hashing and invalid login timing</td><td>Security-sensitive and non-obvious.</td><td>Explain at a high level; avoid implementing hashing manually.</td></tr><tr><td>Soft deletion mixed with <code>fastapi-users</code> active checks</td><td>Deleted, inactive, and unverified states can blur together.</td><td>Use a state table and write model tests before routes.</td></tr><tr><td>Reactivation stale-token validation</td><td>JWT claims plus state comparison is subtle.</td><td>Make this a stretch branch for stronger students.</td></tr><tr><td>Email-change token hashing and race handling</td><td>Requires token security, expiry, cancellation, and DB integrity handling.</td><td>Teach model helpers first; add race-safe <code>IntegrityError</code> handling last.</td></tr><tr><td>Alembic parallel migrations</td><td>Student branches can create multiple heads.</td><td>Assign one migration captain or merge migration branches sequentially.</td></tr><tr><td>OpenAPI polish for empty responses</td><td>Looks minor but requires route metadata details.</td><td>Teach after features work, as documentation polish.</td></tr></tbody></table></div>
+<h2 id="simplified-workshop-variant">Simplified Workshop Variant</h2>
+<p>For a one-day beginner workshop, consider stopping at:</p>
+<ol><li>health endpoint</li><li>settings</li><li>DB session</li><li>user model</li><li>registration</li><li>verification</li><li>login/logout</li><li><code>/users/me</code></li><li>profile update</li><li>change password</li></ol>
+<p>Defer:</p>
+<ul><li>DB bootstrap internals</li><li>soft delete</li><li>reactivation</li><li>email changes</li><li>migration guard script</li><li>PostgreSQL trigger for <code>updated_at</code></li></ul>
+<h2 id="instructor-starter-code-candidates">Instructor Starter Code Candidates</h2>
+<p>Provide these files up front if time is tight:</p>
+<ul><li><code>src/explore/db/config.py</code></li><li><code>src/explore/db/bootstrap.py</code></li><li><code>src/explore/db/migrate.py</code></li><li><code>tests/conftest.py</code></li><li><code>.pre-commit-config.yaml</code></li><li><code>scripts/check_empty_migrations.py</code></li></ul>
+<p>Then have students implement feature modules, tests, and migrations.</p>
+      <nav class="pager"><a href="06-teaching-notes.html">Previous: Teaching Notes</a><span></span><a href="08-code-walkthrough-snippets.html">Next: Code Walkthrough Snippets</a></nav>
+    </main>
+  </div>
+</body>
+</html>

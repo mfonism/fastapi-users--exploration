@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Parallelization Plan | Explore Teaching Library</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../index.html">Explore Teaching Library</a>
+    <nav class="top-nav" aria-label="Primary navigation">
+      <a href="index.html">Articles</a>
+      <a href="../tasks/index.html">Tasks</a>
+    </nav>
+  </header>
+  <div class="page-layout">
+    
+<aside class="sidebar">
+  <div class="sidebar-section">
+    <h2>Library</h2>
+    <ul>
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="index.html">Article Index</a></li>
+      <li><a href="../tasks/index.html">Task Index</a></li>
+    </ul>
+  </div>
+  <div class="sidebar-section">
+    <h2>Articles</h2>
+    <ol><li><a href="teaching-pack-overview.html">Teaching Pack Overview</a></li>
+<li><a href="01-project-summary.html">Project Summary</a></li>
+<li><a href="02-final-architecture.html">Final Architecture</a></li>
+<li><a href="03-infrastructure-first-setup.html">Infrastructure-First Setup</a></li>
+<li><a href="04-recommended-teaching-sequence.html">Recommended Teaching Sequence</a></li>
+<li><a href="05-parallelization-plan.html">Parallelization Plan</a></li>
+<li><a href="06-teaching-notes.html">Teaching Notes</a></li>
+<li><a href="07-risk-review.html">Risk Review</a></li>
+<li><a href="08-code-walkthrough-snippets.html">Code Walkthrough Snippets</a></li></ol>
+  </div>
+  <div class="sidebar-section">
+    <h2>Tasks</h2>
+    <ol class="task-nav"><li><a href="../tasks/001-scaffold-project.html">001: Scaffold Project</a></li>
+<li><a href="../tasks/002-add-fastapi-health-app.html">002: Add FastAPI Health App</a></li>
+<li><a href="../tasks/003-add-lint-format-tooling.html">003: Add Lint And Format Tooling</a></li>
+<li><a href="../tasks/004-add-environment-model.html">004: Add Environment Model</a></li>
+<li><a href="../tasks/005-add-settings.html">005: Add Settings</a></li>
+<li><a href="../tasks/006-add-db-session-helpers.html">006: Add DB Session Helpers</a></li>
+<li><a href="../tasks/007-initialize-alembic.html">007: Initialize Alembic</a></li>
+<li><a href="../tasks/008-add-db-commands.html">008: Add DB Commands</a></li>
+<li><a href="../tasks/009-guard-migrations.html">009: Guard Migrations</a></li>
+<li><a href="../tasks/010-add-utilities.html">010: Add Utilities</a></li>
+<li><a href="../tasks/011-add-app-errors.html">011: Add App Errors</a></li>
+<li><a href="../tasks/012-create-user-model.html">012: Create User Model</a></li>
+<li><a href="../tasks/013-add-user-factories.html">013: Add User Factories</a></li>
+<li><a href="../tasks/014-add-account-state-fields.html">014: Add Account-State Fields</a></li>
+<li><a href="../tasks/015-add-user-schemas.html">015: Add User Schemas</a></li>
+<li><a href="../tasks/016-add-user-manager.html">016: Add User Manager</a></li>
+<li><a href="../tasks/017-add-redis-auth-backend.html">017: Add Redis Auth Backend</a></li>
+<li><a href="../tasks/018-wire-generated-auth-routers.html">018: Wire Generated Auth Routers</a></li>
+<li><a href="../tasks/019-test-registration.html">019: Test Registration</a></li>
+<li><a href="../tasks/020-add-verification-flow.html">020: Add Verification Flow</a></li>
+<li><a href="../tasks/021-add-login-logout.html">021: Add Login And Logout</a></li>
+<li><a href="../tasks/022-add-current-user-endpoint.html">022: Add Current-User Endpoint</a></li>
+<li><a href="../tasks/023-add-profile-update.html">023: Add Profile Update</a></li>
+<li><a href="../tasks/024-add-deactivation.html">024: Add Deactivation</a></li>
+<li><a href="../tasks/025-add-soft-delete.html">025: Add Soft Delete</a></li>
+<li><a href="../tasks/026-add-password-reset.html">026: Add Password Reset</a></li>
+<li><a href="../tasks/027-add-change-password.html">027: Add Change Password</a></li>
+<li><a href="../tasks/028-add-reactivation-service.html">028: Add Reactivation Service</a></li>
+<li><a href="../tasks/029-add-reactivation-routes.html">029: Add Reactivation Routes</a></li>
+<li><a href="../tasks/030-add-email-change-model.html">030: Add Email-Change Model</a></li>
+<li><a href="../tasks/031-add-email-change-request-service.html">031: Add Email-Change Request Service</a></li>
+<li><a href="../tasks/032-add-email-change-request-route.html">032: Add Email-Change Request Route</a></li>
+<li><a href="../tasks/033-add-email-change-confirmation.html">033: Add Email-Change Confirmation</a></li>
+<li><a href="../tasks/034-polish-openapi.html">034: Polish OpenAPI</a></li>
+<li><a href="../tasks/035-complete-docs.html">035: Complete Docs</a></li></ol>
+  </div>
+</aside>
+
+    <main class="content">
+      <h1 id="parallelization-plan">Parallelization Plan</h1>
+<p>Do not parallelize the earliest infrastructure tasks. Students need the same project shape, dependencies, settings, database layer, user model, auth manager, Redis backend, login flow, and <code>/users/me</code> endpoint before independent work is productive.</p>
+<p>The safe split point is after task 22: <strong>Add current-user endpoint</strong>.</p>
+<h2 id="parallel-branches">Parallel Branches</h2>
+<div class="table-wrap"><table><thead><tr><th>Branch</th><th>Tasks</th><th>Best For</th><th>Notes</th></tr></thead><tbody><tr><td>A: Profile and account state</td><td>23, 24, 25</td><td>Beginner pairs</td><td>Mostly schemas, route handlers, and state transitions.</td></tr><tr><td>B: Password workflows</td><td>26, 27</td><td>Early intermediate pairs</td><td>Shows both generated router customization and custom service routes.</td></tr><tr><td>C: Reactivation</td><td>28, 29</td><td>Stronger students</td><td>Includes JWT claims, stale-token checks, and non-enumeration behavior.</td></tr><tr><td>D: Email changes</td><td>30, 31, 32, 33</td><td>Stronger group or two pairs</td><td>Largest branch; split model/service from route/confirmation work.</td></tr><tr><td>E: OpenAPI and docs</td><td>34, 35</td><td>Documentation-focused pair</td><td>Can run late while feature branches finish.</td></tr></tbody></table></div>
+<h2 id="merge-order">Merge Order</h2>
+<p>Recommended merge order:</p>
+<ol><li>Branch A</li><li>Branch B</li><li>Branch C</li><li>Branch D</li><li>Branch E</li></ol>
+<p>This order reduces conflicts because reactivation depends on deactivation and email-change confirmation depends on soft-delete/current-session behavior.</p>
+<h2 id="expected-conflict-hotspots">Expected Conflict Hotspots</h2>
+<div class="table-wrap"><table><thead><tr><th>File</th><th>Why Conflicts Happen</th><th>Mitigation</th></tr></thead><tbody><tr><td><code>src/explore/auth/routes.py</code></td><td>Multiple branches include new routers.</td><td>Reserve a final router-wiring slot or merge often.</td></tr><tr><td><code>src/explore/auth/users/models.py</code></td><td>Account-state and email-change work may touch user state expectations.</td><td>Complete core model fields before branching.</td></tr><tr><td><code>src/explore/auth/users/manager.py</code></td><td>Password reset, deleted-user checks, login hooks, and verification hooks meet here.</td><td>Assign one branch owner for manager changes.</td></tr><tr><td><code>alembic/versions/*</code></td><td>Parallel migrations create independent revision heads.</td><td>Rebase migrations before merge or have one migration captain.</td></tr><tr><td><code>tests/conftest.py</code></td><td>Auth fixtures may need updates for multiple branches.</td><td>Keep shared fixtures stable after task 22.</td></tr></tbody></table></div>
+<h2 id="suggested-group-assignments">Suggested Group Assignments</h2>
+<p>For a classroom:</p>
+<ul><li>group 1: profile update and deactivation</li><li>group 2: soft delete and current-token logout</li><li>group 3: password change</li><li>group 4: password reset edge cases</li><li>group 5: reactivation service</li><li>group 6: email-change model and helpers</li><li>group 7: email-change routes and confirmation</li><li>group 8: OpenAPI and docs</li></ul>
+<p>For a shorter conference tutorial:</p>
+<ul><li>teach tasks 1-22 together</li><li>demo branch A live</li><li>assign branch B or D as optional lab work</li><li>discuss branch C as a security-focused stretch</li></ul>
+      <nav class="pager"><a href="04-recommended-teaching-sequence.html">Previous: Recommended Teaching Sequence</a><span></span><a href="06-teaching-notes.html">Next: Teaching Notes</a></nav>
+    </main>
+  </div>
+</body>
+</html>

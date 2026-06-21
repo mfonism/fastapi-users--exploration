@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Infrastructure-First Setup | Explore Teaching Library</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../index.html">Explore Teaching Library</a>
+    <nav class="top-nav" aria-label="Primary navigation">
+      <a href="index.html">Articles</a>
+      <a href="../tasks/index.html">Tasks</a>
+    </nav>
+  </header>
+  <div class="page-layout">
+    
+<aside class="sidebar">
+  <div class="sidebar-section">
+    <h2>Library</h2>
+    <ul>
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="index.html">Article Index</a></li>
+      <li><a href="../tasks/index.html">Task Index</a></li>
+    </ul>
+  </div>
+  <div class="sidebar-section">
+    <h2>Articles</h2>
+    <ol><li><a href="teaching-pack-overview.html">Teaching Pack Overview</a></li>
+<li><a href="01-project-summary.html">Project Summary</a></li>
+<li><a href="02-final-architecture.html">Final Architecture</a></li>
+<li><a href="03-infrastructure-first-setup.html">Infrastructure-First Setup</a></li>
+<li><a href="04-recommended-teaching-sequence.html">Recommended Teaching Sequence</a></li>
+<li><a href="05-parallelization-plan.html">Parallelization Plan</a></li>
+<li><a href="06-teaching-notes.html">Teaching Notes</a></li>
+<li><a href="07-risk-review.html">Risk Review</a></li>
+<li><a href="08-code-walkthrough-snippets.html">Code Walkthrough Snippets</a></li></ol>
+  </div>
+  <div class="sidebar-section">
+    <h2>Tasks</h2>
+    <ol class="task-nav"><li><a href="../tasks/001-scaffold-project.html">001: Scaffold Project</a></li>
+<li><a href="../tasks/002-add-fastapi-health-app.html">002: Add FastAPI Health App</a></li>
+<li><a href="../tasks/003-add-lint-format-tooling.html">003: Add Lint And Format Tooling</a></li>
+<li><a href="../tasks/004-add-environment-model.html">004: Add Environment Model</a></li>
+<li><a href="../tasks/005-add-settings.html">005: Add Settings</a></li>
+<li><a href="../tasks/006-add-db-session-helpers.html">006: Add DB Session Helpers</a></li>
+<li><a href="../tasks/007-initialize-alembic.html">007: Initialize Alembic</a></li>
+<li><a href="../tasks/008-add-db-commands.html">008: Add DB Commands</a></li>
+<li><a href="../tasks/009-guard-migrations.html">009: Guard Migrations</a></li>
+<li><a href="../tasks/010-add-utilities.html">010: Add Utilities</a></li>
+<li><a href="../tasks/011-add-app-errors.html">011: Add App Errors</a></li>
+<li><a href="../tasks/012-create-user-model.html">012: Create User Model</a></li>
+<li><a href="../tasks/013-add-user-factories.html">013: Add User Factories</a></li>
+<li><a href="../tasks/014-add-account-state-fields.html">014: Add Account-State Fields</a></li>
+<li><a href="../tasks/015-add-user-schemas.html">015: Add User Schemas</a></li>
+<li><a href="../tasks/016-add-user-manager.html">016: Add User Manager</a></li>
+<li><a href="../tasks/017-add-redis-auth-backend.html">017: Add Redis Auth Backend</a></li>
+<li><a href="../tasks/018-wire-generated-auth-routers.html">018: Wire Generated Auth Routers</a></li>
+<li><a href="../tasks/019-test-registration.html">019: Test Registration</a></li>
+<li><a href="../tasks/020-add-verification-flow.html">020: Add Verification Flow</a></li>
+<li><a href="../tasks/021-add-login-logout.html">021: Add Login And Logout</a></li>
+<li><a href="../tasks/022-add-current-user-endpoint.html">022: Add Current-User Endpoint</a></li>
+<li><a href="../tasks/023-add-profile-update.html">023: Add Profile Update</a></li>
+<li><a href="../tasks/024-add-deactivation.html">024: Add Deactivation</a></li>
+<li><a href="../tasks/025-add-soft-delete.html">025: Add Soft Delete</a></li>
+<li><a href="../tasks/026-add-password-reset.html">026: Add Password Reset</a></li>
+<li><a href="../tasks/027-add-change-password.html">027: Add Change Password</a></li>
+<li><a href="../tasks/028-add-reactivation-service.html">028: Add Reactivation Service</a></li>
+<li><a href="../tasks/029-add-reactivation-routes.html">029: Add Reactivation Routes</a></li>
+<li><a href="../tasks/030-add-email-change-model.html">030: Add Email-Change Model</a></li>
+<li><a href="../tasks/031-add-email-change-request-service.html">031: Add Email-Change Request Service</a></li>
+<li><a href="../tasks/032-add-email-change-request-route.html">032: Add Email-Change Request Route</a></li>
+<li><a href="../tasks/033-add-email-change-confirmation.html">033: Add Email-Change Confirmation</a></li>
+<li><a href="../tasks/034-polish-openapi.html">034: Polish OpenAPI</a></li>
+<li><a href="../tasks/035-complete-docs.html">035: Complete Docs</a></li></ol>
+  </div>
+</aside>
+
+    <main class="content">
+      <h1 id="infrastructure-first-setup">Infrastructure-First Setup</h1>
+<p>The first section of the workshop should make the project runnable, testable, and easy to change before adding many features.</p>
+<h2 id="recommended-early-order">Recommended Early Order</h2>
+<div class="table-wrap"><table><thead><tr><th>Step</th><th>Why It Comes Early</th></tr></thead><tbody><tr><td>Project scaffolding</td><td>Students need an importable package and repeatable commands.</td></tr><tr><td>FastAPI health endpoint</td><td>Gives immediate feedback that the app runs.</td></tr><tr><td>Ruff and pre-commit</td><td>Establishes formatting before many files exist.</td></tr><tr><td>Environment helpers</td><td>Prevents hardcoded local-only behavior.</td></tr><tr><td>Pydantic settings</td><td>Centralizes DB, Redis, and secret configuration.</td></tr><tr><td>Async DB helpers</td><td>Required before models, migrations, and tests.</td></tr><tr><td>Alembic setup</td><td>Teaches schema management before feature tables grow.</td></tr><tr><td>DB bootstrap commands</td><td>Reduces setup friction for local and test DBs.</td></tr><tr><td>Test fixtures</td><td>Gives students a safe feedback loop for endpoint work.</td></tr><tr><td>Basic smoke test</td><td>Confirms the full toolchain works.</td></tr></tbody></table></div>
+<h2 id="local-setup-script-for-students">Local Setup Script For Students</h2>
+<p>These commands should be in the student handout after the first few setup tasks are complete:</p>
+<pre><code class="language-bash">uv sync
+cp .env.example .env
+uv run db-bootstrap
+uv run pytest
+uv run fastapi dev src/explore/app.py</code></pre>
+<p>Optional local services:</p>
+<pre><code class="language-bash">docker run --rm --name explore-postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres:18.3
+docker run --rm --name explore-redis -p 6379:6379 redis:7-alpine</code></pre>
+<h2 id="files-created-during-infrastructure-setup">Files Created During Infrastructure Setup</h2>
+<div class="table-wrap"><table><thead><tr><th>Task</th><th>Files</th></tr></thead><tbody><tr><td>Scaffolding</td><td><code>.python-version</code>, <code>.gitignore</code>, <code>pyproject.toml</code>, <code>README.md</code>, <code>src/explore/__init__.py</code></td></tr><tr><td>Health app</td><td><code>src/explore/app.py</code></td></tr><tr><td>Tooling</td><td><code>.pre-commit-config.yaml</code>, <code>pyproject.toml</code></td></tr><tr><td>Environment</td><td><code>src/explore/env.py</code>, <code>.env.example</code></td></tr><tr><td>Settings</td><td><code>src/explore/settings.py</code>, <code>tests/test_settings.py</code></td></tr><tr><td>Database</td><td><code>src/explore/db/base.py</code>, <code>src/explore/db/config.py</code></td></tr><tr><td>Alembic</td><td><code>alembic.ini</code>, <code>alembic/env.py</code>, <code>alembic/script.py.mako</code>, <code>src/explore/db/registry.py</code></td></tr><tr><td>DB commands</td><td><code>src/explore/db/bootstrap.py</code>, <code>src/explore/db/migrate.py</code>, <code>src/explore/console.py</code></td></tr><tr><td>Migration guard</td><td><code>scripts/check_empty_migrations.py</code>, <code>.pre-commit-config.yaml</code></td></tr></tbody></table></div>
+<h2 id="smoke-test-goals">Smoke Test Goals</h2>
+<p>At the end of the infrastructure block, students should be able to:</p>
+<ul><li>run <code>uv sync</code></li><li>run <code>uv run ruff check .</code></li><li>run <code>uv run ruff format .</code></li><li>start FastAPI locally</li><li>call <code>/health</code></li><li>load settings from <code>.env</code></li><li>connect to PostgreSQL</li><li>run Alembic against the configured DB</li><li>run a minimal pytest test</li></ul>
+<h2 id="teaching-advice">Teaching Advice</h2>
+<p>Keep the infrastructure block explicit but not too long. Beginners need to see why each piece exists, but the workshop momentum should move toward features as soon as the feedback loop works.</p>
+<p>Good checkpoint question:</p>
+<blockquote>If we change the DB name in <code>.env</code>, which object in code eventually sees that value?</blockquote>
+<p>Good simplification:</p>
+<blockquote>Provide the DB bootstrap command as starter code if the group is new to PostgreSQL administration. Teach migrations separately from role/database ownership.</blockquote>
+      <nav class="pager"><a href="02-final-architecture.html">Previous: Final Architecture</a><span></span><a href="04-recommended-teaching-sequence.html">Next: Recommended Teaching Sequence</a></nav>
+    </main>
+  </div>
+</body>
+</html>

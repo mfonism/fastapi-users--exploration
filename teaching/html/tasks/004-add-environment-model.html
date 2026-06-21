@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>004: Add Environment Model | Explore Teaching Library</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../index.html">Explore Teaching Library</a>
+    <nav class="top-nav" aria-label="Primary navigation">
+      <a href="../articles/index.html">Articles</a>
+      <a href="index.html">Tasks</a>
+    </nav>
+  </header>
+  <div class="page-layout">
+    
+<aside class="sidebar">
+  <div class="sidebar-section">
+    <h2>Library</h2>
+    <ul>
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="../articles/index.html">Article Index</a></li>
+      <li><a href="index.html">Task Index</a></li>
+    </ul>
+  </div>
+  <div class="sidebar-section">
+    <h2>Articles</h2>
+    <ol><li><a href="../articles/teaching-pack-overview.html">Teaching Pack Overview</a></li>
+<li><a href="../articles/01-project-summary.html">Project Summary</a></li>
+<li><a href="../articles/02-final-architecture.html">Final Architecture</a></li>
+<li><a href="../articles/03-infrastructure-first-setup.html">Infrastructure-First Setup</a></li>
+<li><a href="../articles/04-recommended-teaching-sequence.html">Recommended Teaching Sequence</a></li>
+<li><a href="../articles/05-parallelization-plan.html">Parallelization Plan</a></li>
+<li><a href="../articles/06-teaching-notes.html">Teaching Notes</a></li>
+<li><a href="../articles/07-risk-review.html">Risk Review</a></li>
+<li><a href="../articles/08-code-walkthrough-snippets.html">Code Walkthrough Snippets</a></li></ol>
+  </div>
+  <div class="sidebar-section">
+    <h2>Tasks</h2>
+    <ol class="task-nav"><li><a href="001-scaffold-project.html">001: Scaffold Project</a></li>
+<li><a href="002-add-fastapi-health-app.html">002: Add FastAPI Health App</a></li>
+<li><a href="003-add-lint-format-tooling.html">003: Add Lint And Format Tooling</a></li>
+<li><a href="004-add-environment-model.html">004: Add Environment Model</a></li>
+<li><a href="005-add-settings.html">005: Add Settings</a></li>
+<li><a href="006-add-db-session-helpers.html">006: Add DB Session Helpers</a></li>
+<li><a href="007-initialize-alembic.html">007: Initialize Alembic</a></li>
+<li><a href="008-add-db-commands.html">008: Add DB Commands</a></li>
+<li><a href="009-guard-migrations.html">009: Guard Migrations</a></li>
+<li><a href="010-add-utilities.html">010: Add Utilities</a></li>
+<li><a href="011-add-app-errors.html">011: Add App Errors</a></li>
+<li><a href="012-create-user-model.html">012: Create User Model</a></li>
+<li><a href="013-add-user-factories.html">013: Add User Factories</a></li>
+<li><a href="014-add-account-state-fields.html">014: Add Account-State Fields</a></li>
+<li><a href="015-add-user-schemas.html">015: Add User Schemas</a></li>
+<li><a href="016-add-user-manager.html">016: Add User Manager</a></li>
+<li><a href="017-add-redis-auth-backend.html">017: Add Redis Auth Backend</a></li>
+<li><a href="018-wire-generated-auth-routers.html">018: Wire Generated Auth Routers</a></li>
+<li><a href="019-test-registration.html">019: Test Registration</a></li>
+<li><a href="020-add-verification-flow.html">020: Add Verification Flow</a></li>
+<li><a href="021-add-login-logout.html">021: Add Login And Logout</a></li>
+<li><a href="022-add-current-user-endpoint.html">022: Add Current-User Endpoint</a></li>
+<li><a href="023-add-profile-update.html">023: Add Profile Update</a></li>
+<li><a href="024-add-deactivation.html">024: Add Deactivation</a></li>
+<li><a href="025-add-soft-delete.html">025: Add Soft Delete</a></li>
+<li><a href="026-add-password-reset.html">026: Add Password Reset</a></li>
+<li><a href="027-add-change-password.html">027: Add Change Password</a></li>
+<li><a href="028-add-reactivation-service.html">028: Add Reactivation Service</a></li>
+<li><a href="029-add-reactivation-routes.html">029: Add Reactivation Routes</a></li>
+<li><a href="030-add-email-change-model.html">030: Add Email-Change Model</a></li>
+<li><a href="031-add-email-change-request-service.html">031: Add Email-Change Request Service</a></li>
+<li><a href="032-add-email-change-request-route.html">032: Add Email-Change Request Route</a></li>
+<li><a href="033-add-email-change-confirmation.html">033: Add Email-Change Confirmation</a></li>
+<li><a href="034-polish-openapi.html">034: Polish OpenAPI</a></li>
+<li><a href="035-complete-docs.html">035: Complete Docs</a></li></ol>
+  </div>
+</aside>
+
+    <main class="content">
+      <h1 id="004-add-environment-model">004: Add Environment Model</h1>
+<h2 id="task-metadata">Task Metadata</h2>
+<div class="table-wrap"><table><thead><tr><th>Field</th><th>Value</th></tr></thead><tbody><tr><td>ID</td><td>004</td></tr><tr><td>Title</td><td>Add environment model</td></tr><tr><td>Parent epic</td><td>E1: Configuration and database infrastructure</td></tr><tr><td>Sibling tasks</td><td>005, 006, 007, 008, 009, 010, 011</td></tr><tr><td>Blocking tasks</td><td>001</td></tr><tr><td>Blocked tasks</td><td>005</td></tr><tr><td>Time estimate</td><td>25-35 minutes</td></tr><tr><td>Difficulty</td><td>Beginner</td></tr><tr><td>Parallelizable</td><td>No</td></tr><tr><td>Suggested labels</td><td><code>config</code>, <code>environment</code>, <code>beginner</code></td></tr><tr><td>Suggested commit</td><td><code>feat: add app environment helpers</code></td></tr></tbody></table></div>
+<h2 id="rich-description">Rich Description</h2>
+<p>Create a small environment module that names the supported application environments and resolves optional env files.</p>
+<h2 id="learning-goal">Learning Goal</h2>
+<p>Students learn to replace scattered string literals with a small explicit model of deployment environments.</p>
+<h2 id="files-created-or-modified">Files Created Or Modified</h2>
+<ul><li><code>src/explore/env.py</code></li></ul>
+<h2 id="exact-implementation-objective">Exact Implementation Objective</h2>
+<p>Define <code>AppEnv</code>, aliases like <code>dev</code> and <code>prod</code>, <code>normalize_app_env</code>, and <code>resolve_env_files</code>.</p>
+<h2 id="acceptance-criteria">Acceptance Criteria</h2>
+<ul><li>Supported environments are <code>local</code>, <code>test</code>, <code>staging</code>, and <code>production</code>.</li><li>Common aliases normalize to those values.</li><li>Unknown environment names raise a clear error.</li><li>Env-file resolution returns <code>.env</code> and <code>.env.&lt;environment&gt;</code> when present.</li></ul>
+<h2 id="teaching-notes">Teaching Notes</h2>
+<p>Ask students why <code>test</code> should not connect to the same database as <code>local</code>.</p>
+      <nav class="pager"><a href="003-add-lint-format-tooling.html">Previous: 003: Add Lint And Format Tooling</a><span></span><a href="005-add-settings.html">Next: 005: Add Settings</a></nav>
+    </main>
+  </div>
+</body>
+</html>
