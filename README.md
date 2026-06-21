@@ -229,3 +229,103 @@ curl -X POST http://127.0.0.1:8000/auth/register \
   -H "Content-Type: application/json" \
   -d '{"email":"alice@example.com","password":"strongpass123"}'
 ```
+
+## Future Plans
+
+### Modular Model Capabilities
+
+The `User` model currently owns several reusable account-state capabilities:
+
+- soft deletion through `deleted_at` / `is_deleted`
+- deactivation through `deactivated_at` / `is_active`
+- verification through `verified_at` / `is_verified`
+- timestamp tracking through `created_at` / `updated_at`
+
+As more models are added, we may extract these repeated capabilities into
+SQLAlchemy mixins. This would make the model layer more modular and create a
+clear teaching example for inheritance and composition.
+
+Possible mixins:
+
+```python
+class SoftDeletable:
+    deleted_at = ...
+
+    @property
+    def is_deleted(self) -> bool: ...
+
+    @classmethod
+    def not_deleted(cls): ...
+
+    @classmethod
+    def deleted(cls): ...
+
+
+class Deactivatable:
+    deactivated_at = ...
+
+    @property
+    def is_active(self) -> bool: ...
+
+    @classmethod
+    def active(cls): ...
+
+    @classmethod
+    def deactivated(cls): ...
+
+
+class Timestamped:
+    created_at = ...
+    updated_at = ...
+```
+
+Then a model could opt into only the capabilities it needs:
+
+```python
+class User(Base, SoftDeletable, Deactivatable, Timestamped):
+    ...
+```
+
+The first safe refactor would be small:
+
+1. Extract `SoftDeletable`.
+2. Extract `Deactivatable`.
+3. Add explicit query predicates such as `User.not_deleted()` and
+   `User.active()`.
+4. Keep `Verifiable` and superuser behavior on `User` until another model
+   needs them.
+
+The goal is not to hide filtering magically. Queries should still be explicit:
+
+```python
+select(User).where(User.not_deleted(), User.active())
+```
+
+These mixins should also expose reusable filtering predicates so query code does
+not have to repeat column details everywhere:
+
+```python
+select(User).where(User.not_deleted())
+select(User).where(User.deleted())
+select(User).where(User.active())
+select(User).where(User.deactivated())
+```
+
+Models can also define combined predicates for common domain concepts:
+
+```python
+class User(Base, SoftDeletable, Deactivatable, Timestamped):
+    @classmethod
+    def available(cls):
+        return cls.not_deleted() & cls.active()
+```
+
+Then callers can use the domain-level predicate when that is what they mean:
+
+```python
+select(User).where(User.available())
+```
+
+This keeps soft-deleted and deactivated records visible when a feature
+intentionally needs them, while reducing repeated query conditions in normal
+application code.
