@@ -11,6 +11,7 @@ router = APIRouter()
 @router.post(
     "/auth/request-reactivation",
     status_code=status.HTTP_202_ACCEPTED,
+    response_class=Response,
     name="auth:request-reactivation",
     tags=["auth"],
 )
