@@ -56,7 +56,7 @@ deactivated users, and emails taken during confirmation.
 ## Acceptance Criteria
 
 - Valid token updates `user.email`.
-- Successful confirmation sets `user.verified_at`.
+- Successful confirmation sets `user.email_verified_at`.
 - Unknown, expired, reused, and cancelled tokens fail.
 - Deleted and deactivated users fail.
 - Taken email cases fail cleanly.

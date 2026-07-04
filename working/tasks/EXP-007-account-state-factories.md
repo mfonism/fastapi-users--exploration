@@ -44,7 +44,7 @@ boolean-like properties such as `is_active` and `is_verified`.
 
 - `is_active` maps to `deactivated_at is None`.
 - `is_deleted` maps to `deleted_at is not None`.
-- `is_verified` maps to `verified_at is not None`.
+- `is_verified` maps to `email_verified_at is not None`.
 - `is_superuser` maps to `superuser_granted_at is not None`.
 - Use the shared clock helper so tests can patch current time.
 

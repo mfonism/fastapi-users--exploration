@@ -238,7 +238,7 @@ The `User` model currently owns several reusable account-state capabilities:
 
 - soft deletion through `deleted_at` / `is_deleted`
 - deactivation through `deactivated_at` / `is_active`
-- verification through `verified_at` / `is_verified`
+- email verification through `email_verified_at` / `is_verified`
 - timestamp tracking through `created_at` / `updated_at`
 
 As more models are added, we may extract these repeated capabilities into

@@ -43,7 +43,7 @@ connects those ideas by creating the first persisted domain model.
 | Identity | `email` | string | Required, unique, indexed, normalized before storage. |
 | Profile | `full_name` | string | Required. |
 | Auth | `hashed_password` | string | Required once auth creation exists; never store raw passwords. |
-| Verification | `verified_at` | timestamp with timezone, nullable | Drives `is_verified` later. |
+| Verification | `email_verified_at` | timestamp with timezone, nullable | Drives `is_verified` later. |
 | Activity | `deactivated_at` | timestamp with timezone, nullable | Drives `is_active` later. |
 | Deletion | `deleted_at` | timestamp with timezone, nullable | Drives `is_deleted` later. |
 | Privilege | `superuser_granted_at` | timestamp with timezone, nullable | Drives `is_superuser` later. |
