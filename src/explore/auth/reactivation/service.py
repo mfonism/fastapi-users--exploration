@@ -1,8 +1,11 @@
 import jwt
+from fastapi import Request
 from fastapi_users import exceptions
 from fastapi_users.jwt import decode_jwt, generate_jwt
 from pydantic import EmailStr
 
+from ...audit.models import AuditActorType
+from ...audit.service import record_audit_log_entry
 from ...settings import settings
 from ...utils.email import normalize_email
 from ..notifications import send_reactivation_request
@@ -44,6 +47,7 @@ async def confirm_reactivation(
     *,
     user_manager: UserManager,
     token: str,
+    request: Request | None = None,
 ) -> User:
     try:
         data = decode_jwt(
@@ -76,4 +80,15 @@ async def confirm_reactivation(
     if user.deactivated_at is None or user.deactivated_at.isoformat() != deactivated_at:
         raise ReactivationBadToken()
 
-    return await user_manager._update(user, {"is_active": True})
+    user = await user_manager._update(user, {"is_active": True})
+    await record_audit_log_entry(
+        user_manager.user_db.session,
+        actor_type=AuditActorType.USER,
+        actor_user_id=user.id,
+        action="user.reactivated",
+        target_type="user",
+        target_id=user.id,
+        request=request,
+    )
+
+    return user

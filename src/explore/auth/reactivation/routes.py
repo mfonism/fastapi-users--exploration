@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, Request, Response, status
 from fastapi_users import exceptions
 
 from ..users.manager import UserManager, get_user_manager
@@ -37,12 +37,14 @@ async def request_user_reactivation(
     tags=["auth"],
 )
 async def reactivate_user(
+    request: Request,
     reactivation_confirm: ReactivationConfirm,
     user_manager: UserManager = Depends(get_user_manager),
 ):
     await confirm_reactivation(
         user_manager=user_manager,
         token=reactivation_confirm.token,
+        request=request,
     )
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
