@@ -5,7 +5,7 @@ INTERNAL_USER_FIELDS = {
     "superuser_granted_at",
     "terms_accepted_at",
     "updated_at",
-    "verified_at",
+    "email_verified_at",
 }
 
 
