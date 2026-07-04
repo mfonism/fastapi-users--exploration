@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, Request, Response, status
 
 from ..dependencies import current_user
 from ..users.manager import UserManager, get_user_manager
@@ -16,6 +16,7 @@ router = APIRouter()
     tags=["auth"],
 )
 async def change_password(
+    request: Request,
     password_change: PasswordChange,
     user: User = Depends(current_user),
     user_manager: UserManager = Depends(get_user_manager),
@@ -25,5 +26,6 @@ async def change_password(
         user_manager=user_manager,
         current_password=password_change.current_password,
         new_password=password_change.new_password,
+        request=request,
     )
     return Response(status_code=status.HTTP_204_NO_CONTENT)
