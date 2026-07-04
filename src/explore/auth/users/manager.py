@@ -157,7 +157,37 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
 
     async def _update(self, user: User, update_dict: dict[str, Any]) -> User:
         self._raise_if_deleted(user)
-        return await super()._update(user, update_dict)
+        validated_update_dict = await self._validate_update_dict(user, update_dict)
+
+        for field, value in validated_update_dict.items():
+            setattr(user, field, value)
+
+        self.user_db.session.add(user)
+        await self.user_db.session.flush()
+
+        return user
+
+    async def _validate_update_dict(
+        self, user: User, update_dict: dict[str, Any]
+    ) -> dict[str, Any]:
+        validated_update_dict = {}
+        for field, value in update_dict.items():
+            if field == "email" and value != user.email:
+                try:
+                    await self.get_by_email(value)
+                    raise exceptions.UserAlreadyExists()
+                except exceptions.UserNotExists:
+                    validated_update_dict["email"] = value
+                    validated_update_dict["is_verified"] = False
+            elif field == "password" and value is not None:
+                await self.validate_password(value, user)
+                validated_update_dict["hashed_password"] = self.password_helper.hash(
+                    value
+                )
+            else:
+                validated_update_dict[field] = value
+
+        return validated_update_dict
 
     async def on_after_register(self, user: User, request: Request | None = None):
         await self.request_verify(user, request)
