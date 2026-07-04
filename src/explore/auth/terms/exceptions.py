@@ -1,2 +1,5 @@
-class CurrentTermsDocumentNotConfigured(RuntimeError):
+from ...exceptions import AppError
+
+
+class CurrentTermsDocumentNotConfigured(AppError):
     pass

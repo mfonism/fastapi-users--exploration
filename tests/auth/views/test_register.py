@@ -2,16 +2,40 @@ import uuid
 from datetime import UTC, datetime
 
 import pytest
+from sqlalchemy import select
 
 from explore.app import app
+from explore.auth.terms.models import (
+    TermsDocument,
+    TermsDocumentKind,
+    UserTermsAcceptance,
+)
 from explore.auth.users.models import User
 from tests.auth.views.assertions import assert_internal_user_fields_hidden
 from tests.factories.user import build_signed_up_user
 
 
+async def create_current_terms_document(session) -> TermsDocument:
+    terms_document = TermsDocument(
+        kind=TermsDocumentKind.TERMS_OF_SERVICE,
+        version="2026-07-04",
+        published_at=datetime(2000, 1, 1, 0, 0, tzinfo=UTC),
+    )
+    session.add(terms_document)
+    await session.flush()
+    return terms_document
+
+
 @pytest.mark.asyncio
-async def test_register_creates_user(client, password_helper, session) -> None:
+async def test_register_creates_user(
+    client,
+    password_helper,
+    session,
+    mock_utcnow,
+) -> None:
     terms_accepted_at = datetime(2000, 10, 10, 0, 0, tzinfo=UTC)
+    terms_document = await create_current_terms_document(session)
+    mock_utcnow.return_value = terms_accepted_at
 
     response = await client.post(
         app.url_path_for("register:register"),
@@ -19,7 +43,7 @@ async def test_register_creates_user(client, password_helper, session) -> None:
             "email": "alice@example.com",
             "full_name": "Alice Example",
             "password": "strongpass123",
-            "terms_accepted_at": terms_accepted_at.isoformat(),
+            "terms_accepted": True,
         },
     )
 
@@ -43,6 +67,13 @@ async def test_register_creates_user(client, password_helper, session) -> None:
     assert user.superuser_granted_at is None
     assert user.last_login_at is None
 
+    acceptance = await session.scalar(
+        select(UserTermsAcceptance).where(UserTermsAcceptance.user_id == user.id)
+    )
+    assert acceptance is not None
+    assert acceptance.terms_document_id == terms_document.id
+    assert acceptance.accepted_at == terms_accepted_at
+
     password_verified, _ = password_helper.verify_and_update(
         "strongpass123", user.hashed_password
     )
@@ -50,8 +81,8 @@ async def test_register_creates_user(client, password_helper, session) -> None:
 
 
 @pytest.mark.asyncio
-async def test_register_sends_verification_request(client, mocker) -> None:
-    terms_accepted_at = datetime(2000, 10, 10, 0, 0, tzinfo=UTC)
+async def test_register_sends_verification_request(client, mocker, session) -> None:
+    await create_current_terms_document(session)
     verification_token = "random-verification-token"
     mocker.patch(
         "fastapi_users.manager.generate_jwt",
@@ -68,7 +99,7 @@ async def test_register_sends_verification_request(client, mocker) -> None:
             "email": "alice@example.com",
             "full_name": "Alice Example",
             "password": "strongpass123",
-            "terms_accepted_at": terms_accepted_at.isoformat(),
+            "terms_accepted": True,
         },
     )
 
@@ -82,11 +113,11 @@ async def test_register_sends_verification_request(client, mocker) -> None:
 
 @pytest.mark.asyncio
 async def test_register_normalizes_email(client, mocker, session) -> None:
+    await create_current_terms_document(session)
     mock_send_verification_request = mocker.patch(
         "explore.auth.users.manager.send_verification_request",
         autospec=True,
     )
-    terms_accepted_at = datetime(2000, 10, 10, 0, 0, tzinfo=UTC)
 
     response = await client.post(
         app.url_path_for("register:register"),
@@ -94,7 +125,7 @@ async def test_register_normalizes_email(client, mocker, session) -> None:
             "email": "alice@ｅｘａｍｐｌｅ.com",
             "full_name": "Alice Example",
             "password": "strongpass123",
-            "terms_accepted_at": terms_accepted_at.isoformat(),
+            "terms_accepted": True,
         },
     )
 
@@ -129,7 +160,7 @@ async def test_register_rejects_duplicate_email(client, mocker, session) -> None
             "email": duplicate_email,
             "full_name": "Eve All",
             "password": "anotherstrongpass456",
-            "terms_accepted_at": datetime(2000, 10, 10, 0, 5, tzinfo=UTC).isoformat(),
+            "terms_accepted": True,
         },
     )
 
@@ -156,7 +187,7 @@ async def test_register_rejects_duplicate_normalized_email(
             "email": "alice@ｅｘａｍｐｌｅ.com",
             "full_name": "Eve All",
             "password": "anotherstrongpass456",
-            "terms_accepted_at": datetime(2000, 10, 10, 0, 5, tzinfo=UTC).isoformat(),
+            "terms_accepted": True,
         },
     )
 
@@ -172,9 +203,7 @@ async def test_register_rejects_duplicate_normalized_email(
             {
                 "email": "alice@example.com",
                 "password": "strongpass123",
-                "terms_accepted_at": datetime(
-                    2000, 10, 10, 0, 0, tzinfo=UTC
-                ).isoformat(),
+                "terms_accepted": True,
             },
             id="missing_full_name",
         ),
@@ -184,25 +213,23 @@ async def test_register_rejects_duplicate_normalized_email(
                 "full_name": "Alice Example",
                 "password": "strongpass123",
             },
-            id="missing_terms_accepted_at",
+            id="missing_terms_accepted",
         ),
         pytest.param(
             {
                 "email": "alice@example.com",
                 "full_name": "Alice Example",
                 "password": "strongpass123",
-                "terms_accepted_at": "not-a-datetime",
+                "terms_accepted": False,
             },
-            id="invalid_terms_accepted_at",
+            id="terms_not_accepted",
         ),
         pytest.param(
             {
                 "email": "not-an-email",
                 "full_name": "Alice Example",
                 "password": "strongpass123",
-                "terms_accepted_at": datetime(
-                    2000, 10, 10, 0, 0, tzinfo=UTC
-                ).isoformat(),
+                "terms_accepted": True,
             },
             id="invalid_email",
         ),

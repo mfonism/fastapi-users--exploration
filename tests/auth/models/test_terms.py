@@ -4,7 +4,11 @@ import pytest
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
-from explore.auth.terms.models import TermsDocument, UserTermsAcceptance
+from explore.auth.terms.models import (
+    TermsDocument,
+    TermsDocumentKind,
+    UserTermsAcceptance,
+)
 from tests.factories.user import build_signed_up_user
 
 
@@ -12,7 +16,7 @@ from tests.factories.user import build_signed_up_user
 async def test_user_terms_acceptance_records_policy_version(session) -> None:
     user = build_signed_up_user()
     terms_document = TermsDocument(
-        kind="terms_of_service",
+        kind=TermsDocumentKind.TERMS_OF_SERVICE,
         version="2026-07-04",
         published_at=datetime(2026, 7, 4, 0, 0, tzinfo=UTC),
     )
@@ -45,12 +49,12 @@ async def test_terms_document_version_is_unique_per_kind(session) -> None:
     session.add_all(
         [
             TermsDocument(
-                kind="terms_of_service",
+                kind=TermsDocumentKind.TERMS_OF_SERVICE,
                 version="2026-07-04",
                 published_at=datetime(2026, 7, 4, 0, 0, tzinfo=UTC),
             ),
             TermsDocument(
-                kind="terms_of_service",
+                kind=TermsDocumentKind.TERMS_OF_SERVICE,
                 version="2026-07-04",
                 published_at=datetime(2026, 7, 4, 0, 0, tzinfo=UTC),
             ),

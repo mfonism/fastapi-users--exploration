@@ -16,6 +16,7 @@ from ...utils import clock
 from ...utils.email import normalize_email
 from ..exceptions import UserDeleted
 from ..notifications import send_password_reset_request, send_verification_request
+from ..terms.service import record_terms_acceptance
 from .models import User
 
 
@@ -30,6 +31,47 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     def _raise_if_deleted(self, user: User) -> None:
         if user.is_deleted:
             raise UserDeleted()
+
+    async def create(
+        self,
+        user_create,
+        safe: bool = False,
+        request: Request | None = None,
+    ) -> User:
+        await self.validate_password(user_create.password, user_create)
+
+        existing_user = await self.user_db.get_by_email(user_create.email)
+        if existing_user is not None:
+            raise exceptions.UserAlreadyExists()
+
+        user_dict = (
+            user_create.create_update_dict()
+            if safe
+            else user_create.create_update_dict_superuser()
+        )
+        password = user_dict.pop("password")
+        user_dict.pop("terms_accepted")
+
+        accepted_at = clock.utcnow()
+        user_dict["hashed_password"] = self.password_helper.hash(password)
+        user_dict["terms_accepted_at"] = accepted_at
+
+        session = self.user_db.session
+        created_user = self.user_db.user_table(**user_dict)
+        session.add(created_user)
+        await session.flush()
+        await record_terms_acceptance(
+            session,
+            user=created_user,
+            accepted_at=accepted_at,
+            request=request,
+        )
+        await session.commit()
+        await session.refresh(created_user)
+
+        await self.on_after_register(created_user, request)
+
+        return created_user
 
     async def get_by_email(self, user_email: str) -> User:
         try:

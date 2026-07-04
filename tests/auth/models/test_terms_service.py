@@ -4,9 +4,8 @@ import pytest
 from starlette.requests import Request
 
 from explore.auth.terms.exceptions import CurrentTermsDocumentNotConfigured
-from explore.auth.terms.models import TermsDocument
+from explore.auth.terms.models import TermsDocument, TermsDocumentKind
 from explore.auth.terms.service import (
-    TERMS_OF_SERVICE,
     get_current_terms_document,
     record_terms_acceptance,
 )
@@ -33,22 +32,22 @@ async def test_get_current_terms_document_returns_latest_published_document(
     now = datetime(2026, 7, 4, 12, 0, tzinfo=UTC)
     mock_utcnow.return_value = now
     old_terms = TermsDocument(
-        kind=TERMS_OF_SERVICE,
+        kind=TermsDocumentKind.TERMS_OF_SERVICE,
         version="2026-01-01",
         published_at=datetime(2026, 1, 1, 0, 0, tzinfo=UTC),
     )
     current_terms = TermsDocument(
-        kind=TERMS_OF_SERVICE,
+        kind=TermsDocumentKind.TERMS_OF_SERVICE,
         version="2026-07-04",
         published_at=datetime(2026, 7, 4, 0, 0, tzinfo=UTC),
     )
     future_terms = TermsDocument(
-        kind=TERMS_OF_SERVICE,
+        kind=TermsDocumentKind.TERMS_OF_SERVICE,
         version="2026-12-01",
         published_at=datetime(2026, 12, 1, 0, 0, tzinfo=UTC),
     )
     retired_terms = TermsDocument(
-        kind=TERMS_OF_SERVICE,
+        kind=TermsDocumentKind.TERMS_OF_SERVICE,
         version="2026-06-01",
         published_at=datetime(2026, 6, 1, 0, 0, tzinfo=UTC),
         retired_at=datetime(2026, 7, 1, 0, 0, tzinfo=UTC),
@@ -76,7 +75,7 @@ async def test_record_terms_acceptance_uses_current_terms_document(
     mock_utcnow.return_value = now
     user = build_signed_up_user()
     terms_document = TermsDocument(
-        kind=TERMS_OF_SERVICE,
+        kind=TermsDocumentKind.TERMS_OF_SERVICE,
         version="2026-07-04",
         published_at=datetime(2026, 7, 4, 0, 0, tzinfo=UTC),
     )

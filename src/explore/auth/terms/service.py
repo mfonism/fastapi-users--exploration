@@ -7,15 +7,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ...utils import clock
 from ..users.models import User
 from .exceptions import CurrentTermsDocumentNotConfigured
-from .models import TermsDocument, UserTermsAcceptance
-
-TERMS_OF_SERVICE = "terms_of_service"
+from .models import TermsDocument, TermsDocumentKind, UserTermsAcceptance
 
 
 async def get_current_terms_document(
     session: AsyncSession,
     *,
-    kind: str = TERMS_OF_SERVICE,
+    kind: TermsDocumentKind = TermsDocumentKind.TERMS_OF_SERVICE,
 ) -> TermsDocument:
     terms_document = await session.scalar(
         select(TermsDocument)
