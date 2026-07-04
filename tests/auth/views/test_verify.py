@@ -24,8 +24,8 @@ async def test_verify_marks_user_verified(client, mock_utcnow, session) -> None:
         UserManager.verification_token_secret,
         UserManager.verification_token_lifetime_seconds,
     )
-    verified_at = datetime(2000, 10, 10, 0, 0, tzinfo=UTC)
-    mock_utcnow.return_value = verified_at
+    email_verified_at = datetime(2000, 10, 10, 0, 0, tzinfo=UTC)
+    mock_utcnow.return_value = email_verified_at
 
     response = await client.post(
         app.url_path_for("verify:verify"),
@@ -38,7 +38,7 @@ async def test_verify_marks_user_verified(client, mock_utcnow, session) -> None:
     assert_internal_user_fields_hidden(payload)
 
     await session.refresh(user)
-    assert user.verified_at == verified_at
+    assert user.email_verified_at == email_verified_at
 
 
 @pytest.mark.asyncio
@@ -56,8 +56,8 @@ async def test_verify_is_idempotent(client, mock_utcnow, session) -> None:
         UserManager.verification_token_secret,
         UserManager.verification_token_lifetime_seconds,
     )
-    verified_at = datetime(2000, 10, 10, 0, 0, tzinfo=UTC)
-    mock_utcnow.return_value = verified_at
+    email_verified_at = datetime(2000, 10, 10, 0, 0, tzinfo=UTC)
+    mock_utcnow.return_value = email_verified_at
 
     first_response = await client.post(
         app.url_path_for("verify:verify"),
@@ -72,7 +72,7 @@ async def test_verify_is_idempotent(client, mock_utcnow, session) -> None:
     assert second_response.status_code == 200
 
     await session.refresh(user)
-    assert user.verified_at == verified_at
+    assert user.email_verified_at == email_verified_at
 
 
 @pytest.mark.asyncio
@@ -99,7 +99,7 @@ async def test_verify_rejects_expired_token(client, session) -> None:
 
     assert response.status_code == 400
     await session.refresh(user)
-    assert user.verified_at is None
+    assert user.email_verified_at is None
 
 
 @pytest.mark.asyncio
@@ -126,5 +126,5 @@ async def test_verify_rejects_deleted_user(client, session) -> None:
 
     assert response.status_code == 400
     await session.refresh(user)
-    assert user.verified_at is None
+    assert user.email_verified_at is None
     assert user.deleted_at == deleted_at

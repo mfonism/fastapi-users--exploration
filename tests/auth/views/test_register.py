@@ -39,7 +39,7 @@ async def test_register_creates_user(client, password_helper, session) -> None:
     assert user.hashed_password != "strongpass123"
     assert user.terms_accepted_at == terms_accepted_at
     assert user.deactivated_at is None
-    assert user.verified_at is None
+    assert user.email_verified_at is None
     assert user.superuser_granted_at is None
     assert user.last_login_at is None
 

@@ -107,7 +107,7 @@ async def confirm_email_change(
         raise EmailChangeBadToken()
 
     user.email = email_change.new_email
-    user.verified_at = email_change.confirmed_at
+    user.email_verified_at = email_change.confirmed_at
     try:
         await session.flush()
     except IntegrityError as error:

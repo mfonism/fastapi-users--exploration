@@ -24,7 +24,7 @@ class User(Base):
     hashed_password: Mapped[str] = mapped_column(String(length=1024), nullable=False)
 
     # Account status
-    verified_at: Mapped[datetime | None] = mapped_column(
+    email_verified_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
     deactivated_at: Mapped[datetime | None] = mapped_column(
@@ -89,14 +89,14 @@ class User(Base):
 
     @property
     def is_verified(self) -> bool:
-        return self.verified_at is not None
+        return self.email_verified_at is not None
 
     @is_verified.setter
     def is_verified(self, value: bool) -> None:
         if value == self.is_verified:
             return
 
-        self.verified_at = clock.utcnow() if value else None
+        self.email_verified_at = clock.utcnow() if value else None
 
     @property
     def is_superuser(self) -> bool:

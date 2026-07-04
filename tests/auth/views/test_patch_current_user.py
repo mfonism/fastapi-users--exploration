@@ -43,8 +43,8 @@ async def test_patch_current_user_updates_full_name(
         pytest.param({"email": "alice.updated@example.com"}, id="email"),
         pytest.param({"password": "newstrongpass123"}, id="password"),
         pytest.param(
-            {"verified_at": datetime(2000, 10, 10, 0, 0, tzinfo=UTC).isoformat()},
-            id="verified_at",
+            {"email_verified_at": datetime(2000, 10, 10, 0, 0, tzinfo=UTC).isoformat()},
+            id="email_verified_at",
         ),
         pytest.param(
             {"deleted_at": datetime(2000, 10, 10, 0, 0, tzinfo=UTC).isoformat()},

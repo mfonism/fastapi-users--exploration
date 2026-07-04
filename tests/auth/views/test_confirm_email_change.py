@@ -44,7 +44,7 @@ async def test_confirm_email_change_updates_user_email(
     await session.refresh(user)
     await session.refresh(email_change)
     assert user.email == "alice.updated@example.com"
-    assert user.verified_at == confirmed_at
+    assert user.email_verified_at == confirmed_at
     assert email_change.confirmed_at == confirmed_at
 
 

@@ -21,29 +21,29 @@ def test_repr_excludes_hashed_password() -> None:
     assert "super-secret-hash" not in representation
 
 
-def test_is_verified_tracks_verified_at(mock_utcnow) -> None:
+def test_is_verified_tracks_email_verified_at(mock_utcnow) -> None:
     user = build_signed_up_user()
-    assert user.verified_at is None
+    assert user.email_verified_at is None
 
     timestamp = datetime(2000, 10, 10, 0, 0, tzinfo=UTC)
     mock_utcnow.return_value = timestamp
 
     user.is_verified = True
 
-    assert user.verified_at == timestamp
+    assert user.email_verified_at == timestamp
 
     user.is_verified = False
 
-    assert user.verified_at is None
+    assert user.email_verified_at is None
 
 
 def test_is_verified_true_is_noop_if_already_verified() -> None:
-    verified_at = datetime(2000, 10, 10, 0, 0, tzinfo=UTC)
-    user = build_verified_user(verified_at=verified_at)
+    email_verified_at = datetime(2000, 10, 10, 0, 0, tzinfo=UTC)
+    user = build_verified_user(email_verified_at=email_verified_at)
 
     user.is_verified = True
 
-    assert user.verified_at == verified_at
+    assert user.email_verified_at == email_verified_at
 
 
 def test_is_verified_false_is_noop_if_already_unverified() -> None:
@@ -51,7 +51,7 @@ def test_is_verified_false_is_noop_if_already_unverified() -> None:
 
     user.is_verified = False
 
-    assert user.verified_at is None
+    assert user.email_verified_at is None
 
 
 @pytest.mark.asyncio

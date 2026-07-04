@@ -17,7 +17,7 @@ class UserRead(schemas.CreateUpdateDictModel):
     superuser_granted_at: datetime | None = None
     deactivated_at: datetime | None = None
     deleted_at: datetime | None = None
-    verified_at: datetime | None = None
+    email_verified_at: datetime | None = None
     terms_accepted_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

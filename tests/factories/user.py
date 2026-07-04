@@ -12,7 +12,7 @@ __all__ = [
 ]
 
 SIGNED_UP_AT = datetime(2000, 1, 2, 3, 0, tzinfo=UTC)
-VERIFIED_AT = datetime(2000, 1, 2, 4, 0, tzinfo=UTC)
+EMAIL_VERIFIED_AT = datetime(2000, 1, 2, 4, 0, tzinfo=UTC)
 FIRST_LOGIN_AT = datetime(2000, 1, 2, 5, 0, tzinfo=UTC)
 SUPERUSER_GRANTED_AT = datetime(2000, 1, 2, 6, 0, tzinfo=UTC)
 DELETED_AT = datetime(2000, 1, 2, 7, 0, tzinfo=UTC)
@@ -27,7 +27,7 @@ _SIGNED_UP_STATE = {
 }
 
 _VERIFIED_STATE = {
-    "verified_at": VERIFIED_AT,
+    "email_verified_at": EMAIL_VERIFIED_AT,
 }
 
 _LOGGED_IN_STATE = _VERIFIED_STATE | {
