@@ -10,6 +10,8 @@ from fastapi_users.db import SQLAlchemyUserDatabase
 from fastapi_users.jwt import decode_jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from ...audit.models import AuditActorType
+from ...audit.service import record_audit_log_entry
 from ...db.config import get_async_session
 from ...settings import settings
 from ...utils import clock
@@ -60,10 +62,31 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
         created_user = self.user_db.user_table(**user_dict)
         session.add(created_user)
         await session.flush()
-        await record_terms_acceptance(
+        acceptance = await record_terms_acceptance(
             session,
             user=created_user,
             accepted_at=accepted_at,
+            request=request,
+        )
+        await record_audit_log_entry(
+            session,
+            actor_type=AuditActorType.ANONYMOUS,
+            action="user.registered",
+            target_type="user",
+            target_id=created_user.id,
+            occurred_at=accepted_at,
+            request=request,
+        )
+        await record_audit_log_entry(
+            session,
+            actor_type=AuditActorType.USER,
+            actor_user_id=created_user.id,
+            action="user.terms_accepted",
+            target_type="user",
+            target_id=created_user.id,
+            subject_type="terms_document",
+            subject_id=acceptance.terms_document_id,
+            occurred_at=accepted_at,
             request=request,
         )
         await session.commit()

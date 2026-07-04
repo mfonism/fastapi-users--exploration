@@ -5,6 +5,7 @@ import pytest
 from sqlalchemy import select
 
 from explore.app import app
+from explore.audit.models import AuditActorType, AuditLogEntry
 from explore.auth.terms.models import (
     TermsDocument,
     TermsDocumentKind,
@@ -39,6 +40,10 @@ async def test_register_creates_user(
 
     response = await client.post(
         app.url_path_for("register:register"),
+        headers={
+            "user-agent": "pytest",
+            "x-request-id": "request-123",
+        },
         json={
             "email": "alice@example.com",
             "full_name": "Alice Example",
@@ -73,6 +78,37 @@ async def test_register_creates_user(
     assert acceptance is not None
     assert acceptance.terms_document_id == terms_document.id
     assert acceptance.accepted_at == terms_accepted_at
+
+    audit_entries = (
+        await session.scalars(
+            select(AuditLogEntry)
+            .where(AuditLogEntry.target_id == user.id)
+            .order_by(AuditLogEntry.action)
+        )
+    ).all()
+    assert [entry.action for entry in audit_entries] == [
+        "user.registered",
+        "user.terms_accepted",
+    ]
+
+    registered_entry = audit_entries[0]
+    assert registered_entry.actor_type == AuditActorType.ANONYMOUS
+    assert registered_entry.actor_user_id is None
+    assert registered_entry.target_type == "user"
+    assert registered_entry.target_id == user.id
+    assert registered_entry.occurred_at == terms_accepted_at
+    assert registered_entry.ip_address == "127.0.0.1"
+    assert registered_entry.user_agent == "pytest"
+    assert registered_entry.request_id == "request-123"
+
+    terms_entry = audit_entries[1]
+    assert terms_entry.actor_type == AuditActorType.USER
+    assert terms_entry.actor_user_id == user.id
+    assert terms_entry.target_type == "user"
+    assert terms_entry.target_id == user.id
+    assert terms_entry.subject_type == "terms_document"
+    assert terms_entry.subject_id == terms_document.id
+    assert terms_entry.occurred_at == terms_accepted_at
 
     password_verified, _ = password_helper.verify_and_update(
         "strongpass123", user.hashed_password
