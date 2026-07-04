@@ -1,9 +1,10 @@
 from datetime import UTC, datetime, timedelta
 
 import pytest
-from sqlalchemy import delete
+from sqlalchemy import delete, select
 
 from explore.app import app
+from explore.audit.models import AuditActorType, AuditLogEntry
 from explore.auth.email_changes.models import UserEmailChange, hash_email_change_token
 from explore.auth.users.models import User
 from tests.factories.user import (
@@ -37,6 +38,10 @@ async def test_confirm_email_change_updates_user_email(
 
     response = await client.post(
         app.url_path_for("auth:confirm-email-change"),
+        headers={
+            "user-agent": "pytest",
+            "x-request-id": "request-123",
+        },
         json={"token": "email-change-token"},
     )
 
@@ -46,6 +51,20 @@ async def test_confirm_email_change_updates_user_email(
     assert user.email == "alice.updated@example.com"
     assert user.email_verified_at == confirmed_at
     assert email_change.confirmed_at == confirmed_at
+
+    audit_entry = await session.scalar(select(AuditLogEntry))
+    assert audit_entry is not None
+    assert audit_entry.actor_type == AuditActorType.USER
+    assert audit_entry.actor_user_id == user.id
+    assert audit_entry.action == "user.email_change.confirmed"
+    assert audit_entry.target_type == "user"
+    assert audit_entry.target_id == user.id
+    assert audit_entry.subject_type == "user_email_change"
+    assert audit_entry.subject_id == email_change.id
+    assert audit_entry.occurred_at == confirmed_at
+    assert audit_entry.ip_address == "127.0.0.1"
+    assert audit_entry.user_agent == "pytest"
+    assert audit_entry.request_id == "request-123"
 
 
 @pytest.mark.asyncio

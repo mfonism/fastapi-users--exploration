@@ -91,6 +91,7 @@ async def confirm_email_change(
     *,
     session: AsyncSession,
     token: str,
+    request: Request | None = None,
 ) -> UserEmailChange:
     email_change = await session.scalar(
         select(UserEmailChange).where(
@@ -131,6 +132,19 @@ async def confirm_email_change(
             raise EmailChangeEmailTaken() from None
 
         raise
+
+    await record_audit_log_entry(
+        session,
+        actor_type=AuditActorType.USER,
+        actor_user_id=user.id,
+        action="user.email_change.confirmed",
+        target_type="user",
+        target_id=user.id,
+        subject_type="user_email_change",
+        subject_id=email_change.id,
+        occurred_at=email_change.confirmed_at,
+        request=request,
+    )
 
     return email_change
 

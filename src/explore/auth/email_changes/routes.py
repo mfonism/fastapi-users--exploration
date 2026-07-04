@@ -46,6 +46,7 @@ async def request_current_user_email_change(
     tags=["auth"],
 )
 async def confirm_current_user_email_change(
+    request: Request,
     email_change_confirm: EmailChangeConfirm,
     user_token: tuple[User, str] | None = Depends(optional_current_user_token),
     session: AsyncSession = Depends(get_async_session),
@@ -54,6 +55,7 @@ async def confirm_current_user_email_change(
     email_change = await confirm_email_change(
         session=session,
         token=email_change_confirm.token,
+        request=request,
     )
 
     if user_token is not None:
