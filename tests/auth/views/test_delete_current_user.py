@@ -1,8 +1,10 @@
 from datetime import UTC, datetime
 
 import pytest
+from sqlalchemy import select
 
 from explore.app import app
+from explore.audit.models import AuditActorType, AuditLogEntry
 from tests.factories.user import build_verified_user
 
 
@@ -22,11 +24,31 @@ async def test_delete_current_user_soft_deletes_user(
     deleted_at = datetime(2000, 10, 10, 0, 0, tzinfo=UTC)
     mock_utcnow.return_value = deleted_at
 
-    response = await client.delete(app.url_path_for("users:delete_current_user"))
+    response = await client.delete(
+        app.url_path_for("users:delete_current_user"),
+        headers={
+            "user-agent": "pytest",
+            "x-request-id": "request-123",
+        },
+    )
 
     assert response.status_code == 204
     await session.refresh(user)
     assert user.deleted_at == deleted_at
+
+    audit_entry = await session.scalar(
+        select(AuditLogEntry).where(AuditLogEntry.target_id == user.id)
+    )
+    assert audit_entry is not None
+    assert audit_entry.actor_type == AuditActorType.USER
+    assert audit_entry.actor_user_id == user.id
+    assert audit_entry.action == "user.deleted"
+    assert audit_entry.target_type == "user"
+    assert audit_entry.target_id == user.id
+    assert audit_entry.occurred_at == deleted_at
+    assert audit_entry.ip_address == "127.0.0.1"
+    assert audit_entry.user_agent == "pytest"
+    assert audit_entry.request_id == "request-123"
 
 
 @pytest.mark.asyncio

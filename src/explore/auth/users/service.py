@@ -23,3 +23,22 @@ async def deactivate_user(
         occurred_at=user.deactivated_at,
         request=request,
     )
+
+
+async def soft_delete_user(
+    *,
+    user: User,
+    user_manager: UserManager,
+    request: Request | None = None,
+) -> None:
+    await user_manager._update(user, {"is_deleted": True})
+    await record_audit_log_entry(
+        user_manager.user_db.session,
+        actor_type=AuditActorType.USER,
+        actor_user_id=user.id,
+        action="user.deleted",
+        target_type="user",
+        target_id=user.id,
+        occurred_at=user.deleted_at,
+        request=request,
+    )

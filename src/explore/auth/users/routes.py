@@ -5,7 +5,7 @@ from ..dependencies import current_user, current_user_token
 from .manager import UserManager, get_user_manager
 from .models import User
 from .schemas import CurrentUserRead, CurrentUserUpdate
-from .service import deactivate_user
+from .service import deactivate_user, soft_delete_user
 
 router = APIRouter()
 
@@ -41,12 +41,13 @@ async def update_current_user(
     tags=["users"],
 )
 async def delete_current_user(
+    request: Request,
     user_token: tuple[User, str] = Depends(current_user_token),
     user_manager: UserManager = Depends(get_user_manager),
     strategy=Depends(redis_backend.get_strategy),
 ):
     user, token = user_token
-    await user_manager._update(user, {"is_deleted": True})
+    await soft_delete_user(user=user, user_manager=user_manager, request=request)
     return await redis_backend.logout(strategy, user, token)
 
 
