@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, Request, Response, status
 
 from ..backends.redis import backend as redis_backend
 from ..dependencies import current_user, current_user_token
 from .manager import UserManager, get_user_manager
 from .models import User
 from .schemas import CurrentUserRead, CurrentUserUpdate
+from .service import deactivate_user
 
 router = APIRouter()
 
@@ -56,8 +57,9 @@ async def delete_current_user(
     tags=["auth"],
 )
 async def deactivate(
+    request: Request,
     user: User = Depends(current_user),
     user_manager: UserManager = Depends(get_user_manager),
 ):
-    await user_manager._update(user, {"is_active": False})
+    await deactivate_user(user=user, user_manager=user_manager, request=request)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
