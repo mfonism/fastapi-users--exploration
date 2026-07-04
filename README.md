@@ -329,3 +329,155 @@ select(User).where(User.available())
 This keeps soft-deleted and deactivated records visible when a feature
 intentionally needs them, while reducing repeated query conditions in normal
 application code.
+
+### User State, Workflow Records, Events, And Audit Logs
+
+The `User` model should continue to store the current auth/account snapshot for
+fields that are read in common paths:
+
+- `email_verified_at`
+- `deactivated_at`
+- `deleted_at`
+- `terms_accepted_at`
+- `superuser_granted_at`
+- `last_login_at`
+
+Keeping these fields on `User` makes checks such as "can this user
+authenticate?" straightforward and avoids joins in request-time auth logic.
+
+Stateful workflows should live in dedicated tables when they have their own
+operational lifecycle. For example, an email-change request is more than an
+event because it has a token, expiry, cancellation, and confirmation state:
+
+```text
+UserEmailChangeRequest
+- old_email
+- new_email
+- token_hash
+- expires_at
+- confirmed_at
+- cancelled_at
+- created_at
+```
+
+Password reset can follow the same shape if we decide to own reset-token
+persistence instead of relying only on library token behavior:
+
+```text
+UserPasswordResetRequest
+- token_hash
+- expires_at
+- used_at
+- cancelled_at
+- created_at
+```
+
+For history and accountability, keep two concepts separate:
+
+```text
+UserEvent
+= product/domain timeline of meaningful things that happened
+
+AuditLogEntry
+= accountability and security trail of who or what caused an action
+```
+
+We do not need to build both immediately. The first likely step is
+`AuditLogEntry`, because it supports security review and operational
+accountability. `UserEvent` can wait until the product needs a user-facing
+timeline, support timeline, or domain event feed.
+
+Good candidates for future `UserEvent` entries:
+
+- `user_registered`
+- `email_verification_requested`
+- `email_verified`
+- `password_reset_requested`
+- `password_reset_completed`
+- `password_changed`
+- `terms_accepted`
+- `user_deactivated`
+- `user_reactivated`
+- `user_deleted`
+- `email_change_requested`
+- `email_change_confirmed`
+- `email_change_cancelled`
+- `superuser_granted`
+- `superuser_revoked`
+
+Good candidates for future `AuditLogEntry` actions:
+
+- `user.registered`
+- `user.login.succeeded`
+- `user.login.failed`
+- `user.logout`
+- `user.email_verified`
+- `user.email_change.requested`
+- `user.email_change.confirmed`
+- `user.password_reset.requested`
+- `user.password_reset.completed`
+- `user.password_changed`
+- `user.terms_accepted`
+- `user.deactivated`
+- `user.reactivated`
+- `user.deleted`
+- `user.superuser.granted`
+- `user.superuser.revoked`
+
+Audit entries can include request metadata where available:
+
+```text
+actor_type
+actor_user_id
+action
+target_type
+target_id
+subject_type
+subject_id
+occurred_at
+ip_address
+user_agent
+request_id
+reason
+```
+
+Do not log raw tokens, password hashes, or unnecessary sensitive payloads in
+either events or audit logs.
+
+Terms acceptance may need a dedicated table once policy versions matter:
+
+```text
+TermsDocument
+- kind
+- version
+- published_at
+
+UserTermsAcceptance
+- user_id
+- terms_document_id
+- accepted_at
+- ip_address
+- user_agent
+```
+
+The `User` table can still keep a denormalized `terms_accepted_at` field for
+common checks, while the acceptance table stores the richer compliance record.
+
+State changes that must update multiple records should happen through explicit
+service functions rather than model setters alone:
+
+```python
+confirm_email_change(...)
+request_password_reset(...)
+complete_password_reset(...)
+deactivate_user(...)
+reactivate_user(...)
+accept_terms(...)
+grant_superuser(...)
+revoke_superuser(...)
+```
+
+Each service should update the current `User` snapshot, the workflow record
+when applicable, and the audit/event records in the same transaction. Avoid
+SQLAlchemy event hooks for this until there is a strong reason; explicit
+services are easier to teach, test, and review.
