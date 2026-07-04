@@ -1,10 +1,13 @@
 from datetime import timedelta
 
+from fastapi import Request
 from pydantic import EmailStr
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from ...audit.models import AuditActorType
+from ...audit.service import record_audit_log_entry
 from ...utils import clock
 from ...utils.email import normalize_email
 from ..users.models import User
@@ -28,6 +31,7 @@ async def request_email_change(
     session: AsyncSession,
     user: User,
     new_email: EmailStr,
+    request: Request | None = None,
 ) -> tuple[UserEmailChange, str]:
     new_email = normalize_email(str(new_email))
     if new_email == user.email:
@@ -50,6 +54,18 @@ async def request_email_change(
     )
     session.add(email_change)
     await session.flush()
+    await record_audit_log_entry(
+        session,
+        actor_type=AuditActorType.USER,
+        actor_user_id=user.id,
+        action="user.email_change.requested",
+        target_type="user",
+        target_id=user.id,
+        subject_type="user_email_change",
+        subject_id=email_change.id,
+        occurred_at=now,
+        request=request,
+    )
 
     return email_change, token
 

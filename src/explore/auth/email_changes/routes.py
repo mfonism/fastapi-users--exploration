@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, Request, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ...db.config import get_async_session
@@ -19,6 +19,7 @@ router = APIRouter()
     tags=["auth"],
 )
 async def request_current_user_email_change(
+    request: Request,
     email_change_request: EmailChangeRequest,
     user: User = Depends(current_user),
     session: AsyncSession = Depends(get_async_session),
@@ -27,6 +28,7 @@ async def request_current_user_email_change(
         session=session,
         user=user,
         new_email=email_change_request.new_email,
+        request=request,
     )
 
     await send_email_change_request(

@@ -4,6 +4,7 @@ import pytest
 from sqlalchemy import select
 
 from explore.app import app
+from explore.audit.models import AuditActorType, AuditLogEntry
 from explore.auth.email_changes.models import UserEmailChange, hash_email_change_token
 from explore.auth.email_changes.service import EMAIL_CHANGE_TOKEN_LIFETIME_SECONDS
 from tests.factories.user import build_verified_user
@@ -35,6 +36,10 @@ async def test_request_email_change_stores_request(
 
     response = await client.post(
         app.url_path_for("auth:request-email-change"),
+        headers={
+            "user-agent": "pytest",
+            "x-request-id": "request-123",
+        },
         json={"new_email": "alice.updated@example.com"},
     )
 
@@ -54,6 +59,20 @@ async def test_request_email_change_stores_request(
     )
     assert email_change.confirmed_at is None
     assert email_change.cancelled_at is None
+
+    audit_entry = await session.scalar(select(AuditLogEntry))
+    assert audit_entry is not None
+    assert audit_entry.actor_type == AuditActorType.USER
+    assert audit_entry.actor_user_id == user.id
+    assert audit_entry.action == "user.email_change.requested"
+    assert audit_entry.target_type == "user"
+    assert audit_entry.target_id == user.id
+    assert audit_entry.subject_type == "user_email_change"
+    assert audit_entry.subject_id == email_change.id
+    assert audit_entry.occurred_at == requested_at
+    assert audit_entry.ip_address == "127.0.0.1"
+    assert audit_entry.user_agent == "pytest"
+    assert audit_entry.request_id == "request-123"
 
     mock_send_email_change_request.assert_awaited_once_with(
         recipient_email="alice.updated@example.com",
