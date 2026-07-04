@@ -2,8 +2,10 @@ from datetime import UTC, datetime
 
 import pytest
 from fastapi_users.jwt import generate_jwt
+from sqlalchemy import select
 
 from explore.app import app
+from explore.audit.models import AuditActorType, AuditLogEntry
 from explore.auth.users.manager import UserManager
 from tests.auth.views.assertions import assert_internal_user_fields_hidden
 from tests.factories.user import build_signed_up_user
@@ -29,6 +31,10 @@ async def test_verify_marks_user_verified(client, mock_utcnow, session) -> None:
 
     response = await client.post(
         app.url_path_for("verify:verify"),
+        headers={
+            "user-agent": "pytest",
+            "x-request-id": "request-123",
+        },
         json={"token": verification_token},
     )
 
@@ -39,6 +45,18 @@ async def test_verify_marks_user_verified(client, mock_utcnow, session) -> None:
 
     await session.refresh(user)
     assert user.email_verified_at == email_verified_at
+
+    audit_entry = await session.scalar(select(AuditLogEntry))
+    assert audit_entry is not None
+    assert audit_entry.actor_type == AuditActorType.USER
+    assert audit_entry.actor_user_id == user.id
+    assert audit_entry.action == "user.email_verified"
+    assert audit_entry.target_type == "user"
+    assert audit_entry.target_id == user.id
+    assert audit_entry.occurred_at == email_verified_at
+    assert audit_entry.ip_address == "127.0.0.1"
+    assert audit_entry.user_agent == "pytest"
+    assert audit_entry.request_id == "request-123"
 
 
 @pytest.mark.asyncio
@@ -73,6 +91,9 @@ async def test_verify_is_idempotent(client, mock_utcnow, session) -> None:
 
     await session.refresh(user)
     assert user.email_verified_at == email_verified_at
+
+    audit_entries = (await session.scalars(select(AuditLogEntry))).all()
+    assert [entry.action for entry in audit_entries] == ["user.email_verified"]
 
 
 @pytest.mark.asyncio

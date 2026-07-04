@@ -128,9 +128,22 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
 
     async def verify(self, token: str, request: Request | None = None) -> User:
         try:
-            return await super().verify(token, request)
+            user = await super().verify(token, request)
         except exceptions.UserAlreadyVerified:
             return await self._get_already_verified_user(token)
+
+        await record_audit_log_entry(
+            self.user_db.session,
+            actor_type=AuditActorType.USER,
+            actor_user_id=user.id,
+            action="user.email_verified",
+            target_type="user",
+            target_id=user.id,
+            occurred_at=user.email_verified_at,
+            request=request,
+        )
+
+        return user
 
     async def _get_already_verified_user(self, token: str) -> User:
         try:
