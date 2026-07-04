@@ -17,7 +17,12 @@ async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
     async_session_maker = get_async_session_maker()
 
     async with async_session_maker() as session:
-        yield session
+        try:
+            yield session
+            await session.commit()
+        except BaseException:
+            await session.rollback()
+            raise
 
 
 @lru_cache
